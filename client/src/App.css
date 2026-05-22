@@ -308,6 +308,7 @@
 }
 
 .badge--inline {
+  position: static;
   align-self: flex-start;
 }
 
