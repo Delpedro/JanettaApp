@@ -15,6 +15,7 @@ const FIELDS = {
     summary:     'Podsumowanie zamówienia',
     total:       'Razem',
     place:       'Złóż zamówienie',
+    processing:  'Przetwarzanie...',
     back:        '← Powrót do sklepu',
     emptyCart:   'Koszyk jest pusty.',
     confirmed:   'Zamówienie złożone!',
@@ -22,6 +23,7 @@ const FIELDS = {
     backShop:    'Wróć do sklepu',
     required:    'To pole jest wymagane',
     emailBad:    'Podaj poprawny adres e-mail',
+    orderError:  'Błąd podczas składania zamówienia. Spróbuj ponownie.',
   },
   en: {
     title:       'Checkout',
@@ -35,6 +37,7 @@ const FIELDS = {
     summary:     'Order summary',
     total:       'Total',
     place:       'Place order',
+    processing:  'Processing...',
     back:        '← Back to shop',
     emptyCart:   'Your cart is empty.',
     confirmed:   'Order confirmed!',
@@ -42,6 +45,7 @@ const FIELDS = {
     backShop:    'Back to shop',
     required:    'This field is required',
     emailBad:    'Enter a valid email address',
+    orderError:  'Something went wrong. Please try again.',
   },
 }
 
@@ -63,8 +67,10 @@ export default function CheckoutPage({ lang }) {
   const { items, total, clearCart } = useCart()
   const navigate = useNavigate()
 
-  const [form, setForm]         = useState(EMPTY_FORM)
-  const [errors, setErrors]     = useState({})
+  const [form, setForm]           = useState(EMPTY_FORM)
+  const [errors, setErrors]       = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [serverError, setServerError] = useState('')
   const [confirmed, setConfirmed] = useState(false)
   const [confirmedEmail, setConfirmedEmail] = useState('')
 
@@ -96,19 +102,48 @@ export default function CheckoutPage({ lang }) {
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: undefined }))
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     const errs = validate(form, t)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
     }
-    // Schema signal: order = { customer_name, customer_email, address_street, address_city,
-    //   address_postal, total, status, created_at }
-    // Schema signal: order_items[] = { product_id, qty, price_snapshot, name_pl, name_en }
-    setConfirmedEmail(form.email)
-    clearCart()
-    setConfirmed(true)
+
+    setSubmitting(true)
+    setServerError('')
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name:   form.name,
+          customer_email:  form.email,
+          address_street:  form.street,
+          address_city:    form.city,
+          address_postal:  form.postal,
+          total,
+          items: items.map(({ product, qty }) => ({
+            product_id:     product.id,
+            qty,
+            price_snapshot: product.price,
+            name_pl:        product.name_pl,
+            name_en:        product.name_en,
+          })),
+        }),
+      })
+
+      if (!res.ok) throw new Error('Order failed')
+
+      setConfirmedEmail(form.email)
+      clearCart()
+      setConfirmed(true)
+    } catch {
+      setServerError(t.orderError)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -186,8 +221,10 @@ export default function CheckoutPage({ lang }) {
             </div>
           </fieldset>
 
-          <button type="submit" className="btn btn--primary btn--large checkout-submit">
-            {t.place}
+          {serverError && <p className="checkout-server-error">{serverError}</p>}
+
+          <button type="submit" className="btn btn--primary btn--large checkout-submit" disabled={submitting}>
+            {submitting ? t.processing : t.place}
           </button>
         </form>
 

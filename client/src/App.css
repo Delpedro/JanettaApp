@@ -714,6 +714,17 @@
   min-width: 200px;
 }
 
+.checkout-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.checkout-server-error {
+  font-size: 14px;
+  color: #d63031;
+  margin-bottom: 8px;
+}
+
 /* ── Checkout summary sidebar ───────────────────── */
 .checkout-summary {
   background: var(--surface);

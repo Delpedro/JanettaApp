@@ -106,8 +106,10 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **`GET /api/products/:id`** — live, returns single product or 404.
 - **Seed:** `server/db/seed.js` — run once, idempotent, populated DB with 6 mock products. Real product photos now in `client/public/images/` (product1–6.JPEG). UAT confirmed — all 6 load. Cloudinary later.
 - `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
+- **`POST /api/orders`** — live. Accepts guest checkout payload, writes to `orders` + `order_items`, decrements stock for stock-tracked products. UAT confirmed — order landed in Turso.
+- `CheckoutPage` now POSTs to real API. Loading state, server error handling, bilingual error strings.
 
-**Next concrete action:** Build `POST /api/orders` — wires up guest checkout to the DB.
+**Next concrete action:** Admin auth — `POST /api/auth/login` + JWT middleware.
 
 ---
 
