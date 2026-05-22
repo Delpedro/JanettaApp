@@ -113,8 +113,12 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **First-run setup:** `GET /api/auth/setup/status` + `POST /api/auth/setup` — locks after first admin created. `/setup` page live at client, renders outside shop shell (no header/cart/footer). UAT confirmed — admin account created in Turso.
 - **Admin credentials:** Del's in 1Password. Janetta's TBD (when she's told about the project).
 - `server/db/create-admin.js` exists but is superseded by `/setup` page — can be deleted later.
+- **Admin login:** `/admin/login` page live. Email + password form, calls `POST /api/auth/login`, stores JWT in `localStorage` as `adminToken`, redirects to `/admin/dashboard`. Wrong creds → inline error. Empty fields → inline validation. UAT confirmed.
+- **Admin dashboard stub:** `/admin/dashboard` — reads JWT from localStorage, decodes email from payload, shows signed-in state + sign out button. No token → redirects to `/admin/login`. UAT confirmed.
+- `/setup` success screen now links to `/admin/login`.
+- Both admin routes render outside `ShopShell` (no header/cart/footer) — same pattern as `/setup`.
 
-**Next concrete action:** Admin login page — `POST /api/auth/login` wired to `/admin/login` UI, JWT stored in localStorage, redirect to admin dashboard.
+**Next concrete action:** Real admin dashboard — product list (name, price, stock, published toggle), wired to `GET /api/products` (all products, not just published). Foundation for add/edit/hide.
 
 ---
 
@@ -181,6 +185,7 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Turso account created (delpedro), DB named `jannettasapp`, region eu-west-1
 - 2026-05-22 — DB schema applied: 4 tables (products, users, orders, order_items); schema.sql version controlled in server/db/
 - 2026-05-22 — Auth token stored in 1Password + server/.env (gitignored); .env.example has placeholders only
+- 2026-05-22 — Admin login page + dashboard stub live; JWT stored in localStorage; auth flow UAT confirmed
 - 2026-05-22 — GET /api/products live; seed script populated Turso; frontend drops mock data
 - 2026-05-22 — @libsql/client upgraded to latest (0.6.2 broke on Turso HTTP API); dotenv moved to client.js to fix ESM load order
 - 2026-05-22 — @libsql/client installed; server/db/client.js wired up; server boots clean
