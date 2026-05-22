@@ -104,7 +104,7 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **DB client:** `server/db/client.js` — `@libsql/client` (latest) wired, reads from `.env`, dotenv loaded here to fix ESM import-order issue
 - **`GET /api/products`** — live, queries Turso, returns only published products, normalises to camelCase. UAT confirmed.
 - **`GET /api/products/:id`** — live, returns single product or 404.
-- **Seed:** `server/db/seed.js` — run once, idempotent, populated DB with 6 mock products. Images still served from `client/public/images/` (Cloudinary later).
+- **Seed:** `server/db/seed.js` — run once, idempotent, populated DB with 6 mock products. Real product photos now in `client/public/images/` (product1–6.JPEG). UAT confirmed — all 6 load. Cloudinary later.
 - `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
 
 **Next concrete action:** Build `POST /api/orders` — wires up guest checkout to the DB.
