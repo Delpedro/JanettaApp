@@ -43,7 +43,7 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 | Backend | Node.js + Express |
 | Database | Turso (SQLite cloud) |
 | Auth | JWT |
-| Images | Cloudinary or imgbb (free tier) |
+| Images | Cloudinary |
 | Payments | Stripe + PayPal |
 | Hosting | Vercel |
 | Repo | GitHub (private) |
@@ -95,6 +95,9 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Product cards: image and name are clickable links to detail page
 - Pages live in `client/src/pages/`. Components in `client/src/components/`.
 - Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order)
+- Cart: `CartContext` (global state), `CartDrawer` (slides in from right), cart icon + badge in header. Add to cart wired on cards and detail page. Qty +/−, remove, running total. UAT confirmed.
+- All pushed to GitHub (`main`) — 5 commits live
+- `BUGS.md` exists (local, gitignored) — BUG-001 logged: mock product images cross-assigned
 
 **Schema signals surfaced so far by the mock UI:**
 - `name_pl`, `name_en`, `description_pl`, `description_en` — bilingual required at DB level
@@ -102,8 +105,9 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - `inStock` (bool), `madeToOrder` (bool), `stockQty` (int) — hybrid inventory confirmed
 - `image` — single URL for now; multi-image deferred (open question)
 - `id` — integer for now; slug needed for SEO later
+- Cart line items: `product_id`, `qty`, `price_snapshot` (price at time of order) — surfaces need to snapshot price at checkout, not read live from product
 
-**Next concrete action:** Build mock cart (add-to-cart state, cart drawer/page, item list, total). This will surface checkout data requirements before touching the DB.
+**Next concrete action:** Build mock guest checkout form (name, email, address, order summary, place order CTA). This will surface the full schema for orders + order_items before touching the DB.
 
 ---
 
@@ -142,6 +146,7 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-22 — Cart drawer with total at bottom confirmed — Del's instinct was to show total earlier in the flow, but drawer pattern is cleaner; confirmed after UAT
 - 2026-05-22 — Repo is public, not private — handmade crafts shop, no reason to hide it
 - 2026-05-22 — `CLAUDE.md` is the single source of truth (no separate charter/TLDR/instructions) — fewer files, lower context cost, same effect
 - 2026-05-22 — Bug log will be `BUGS.md` in repo root, gitignored, local only

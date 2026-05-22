@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
 
 export default function ProductCard({ product, lang }) {
+  const { addItem } = useCart()
   const name = lang === 'pl' ? product.name_pl : product.name_en
   const description = lang === 'pl' ? product.description_pl : product.description_en
+  const canBuy = product.inStock || product.madeToOrder
 
   const badge = product.madeToOrder
     ? { text: lang === 'pl' ? 'Na zamówienie' : 'Made to order', cls: 'badge--order' }
@@ -29,7 +32,8 @@ export default function ProductCard({ product, lang }) {
           <span className="product-card__price">{product.price} zł</span>
           <button
             className="btn btn--primary"
-            disabled={!product.inStock && !product.madeToOrder}
+            disabled={!canBuy}
+            onClick={() => canBuy && addItem(product)}
           >
             {lang === 'pl' ? 'Dodaj do koszyka' : 'Add to cart'}
           </button>

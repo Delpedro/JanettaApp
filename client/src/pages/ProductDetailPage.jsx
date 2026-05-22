@@ -1,8 +1,10 @@
 import { useParams, Link } from 'react-router-dom'
 import { products } from '../data/mockProducts'
+import { useCart } from '../context/CartContext'
 
 export default function ProductDetailPage({ lang }) {
   const { id } = useParams()
+  const { addItem } = useCart()
   const product = products.find((p) => p.id === Number(id))
 
   if (!product) {
@@ -54,7 +56,11 @@ export default function ProductDetailPage({ lang }) {
             </p>
           )}
 
-          <button className="btn btn--primary btn--large" disabled={!canBuy}>
+          <button
+            className="btn btn--primary btn--large"
+            disabled={!canBuy}
+            onClick={() => canBuy && addItem(product)}
+          >
             {canBuy
               ? lang === 'pl' ? 'Dodaj do koszyka' : 'Add to cart'
               : lang === 'pl' ? 'Niedostępny' : 'Out of stock'}
