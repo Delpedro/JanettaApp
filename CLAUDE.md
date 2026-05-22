@@ -78,7 +78,7 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 
 ## 6. CURRENT STATE
 
-**Phase:** 2 — Mock storefront UI (building UI before DB to drive schema design).
+**Phase:** 3 — Real backend (connecting DB to frontend, replacing mock data).
 
 **Where we are:**
 - Scaffold done: `client/` (React 18 + Vite) + `server/` (Node + Express) both exist
@@ -87,32 +87,23 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Server has `/health` endpoint — confirmed working
 - Docker + `docker-compose.yml` in place
 - `.gitignore` covers `node_modules`, `.env`, `.claude/`, `BUGS.md`, `TDLR.md`
-- `server/.env.example` exists — actual `.env` not created yet (Turso/Cloudinary creds not set up)
+- `server/.env` exists locally with real Turso creds (gitignored). `server/.env.example` has placeholders.
 - `react-router-dom` installed, `BrowserRouter` wired in `main.jsx`
 - Routing: `/` → `HomePage`, `/product/:id` → `ProductDetailPage`
 - Homepage: 6 product cards, PL/EN toggle, warm craft-shop aesthetic — live at `:5173`
 - Product detail page: image (left), badge + name + price + description + stock qty + CTA (right). Bilingual. Fully responsive.
 - Product cards: image and name are clickable links to detail page
 - Pages live in `client/src/pages/`. Components in `client/src/components/`.
-- Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order)
+- Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order) — still used, will be replaced
 - Cart: `CartContext` (global state), `CartDrawer` (slides in from right), cart icon + badge in header. Add to cart wired on cards and detail page. Qty +/−, remove, running total. UAT confirmed.
 - Checkout: `CheckoutPage` at `/checkout`. Guest form (name, email, street, city, postal). Order summary sidebar. Client-side validation. Mock confirmation screen clears cart. Postal code is free-text (no format validation — supports all countries). UAT confirmed.
 - All pushed to GitHub (`main`) — 5 commits live
 - `BUGS.md` exists (local, gitignored) — BUG-001 logged: mock product images cross-assigned
+- **Turso DB live:** `jannettasapp` on `aws-eu-west-1`. 4 tables applied: `products`, `users`, `orders`, `order_items`
+- **DB schema:** `server/db/schema.sql` (version controlled)
+- **DB client:** `server/db/client.js` — `@libsql/client` wired, reads from `.env`
 
-**Schema signals surfaced so far by the mock UI:**
-- `name_pl`, `name_en`, `description_pl`, `description_en` — bilingual required at DB level
-- `price` — integer (zł), no decimals needed yet
-- `inStock` (bool), `madeToOrder` (bool), `stockQty` (int) — hybrid inventory confirmed
-- `image` — single URL for now; multi-image deferred (open question)
-- `id` — integer for now; slug needed for SEO later
-- Cart line items: `product_id`, `qty`, `price_snapshot` — price snapshotted at checkout, not read live
-- `orders`: `customer_name`, `customer_email`, `address_street`, `address_city`, `address_postal`, `total`, `status`, `created_at`
-- `order_items`: `order_id`, `product_id`, `qty`, `price_snapshot`, `name_pl`, `name_en`
-
-**Phase 2 mock UI is complete.** All storefront screens built and UAT'd. Schema signals fully surfaced.
-
-**Next concrete action:** Design and write the DB schema (Turso/SQLite). Use the schema signals above — this is now a direct read-off, not guesswork.
+**Next concrete action:** Build `GET /api/products` — first real API route, replaces mock data in the frontend.
 
 ---
 
@@ -176,6 +167,10 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Pages in `client/src/pages/`, components stay in `client/src/components/`
 - 2026-05-22 — Postal code stored and validated as free-text — no format enforcement, supports all countries (IE, PL, UK, US, etc.)
 - 2026-05-22 — Mock checkout page built and UAT'd; Phase 2 mock UI complete
+- 2026-05-22 — Turso account created (delpedro), DB named `jannettasapp`, region eu-west-1
+- 2026-05-22 — DB schema applied: 4 tables (products, users, orders, order_items); schema.sql version controlled in server/db/
+- 2026-05-22 — Auth token stored in 1Password + server/.env (gitignored); .env.example has placeholders only
+- 2026-05-22 — @libsql/client installed; server/db/client.js wired up; server boots clean
 
 ---
 
