@@ -1,6 +1,7 @@
 # === Claude Code local files (NEVER push) ===
-CLAUDE.md
 BUGS.md
+TDLR.md
+.claude/
 
 # === Secrets & environment ===
 .env

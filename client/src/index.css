@@ -1,0 +1,55 @@
+:root {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --border: #e8e0d5;
+  --text: #4a3f35;
+  --text-light: #7a6f65;
+  --heading: #2c231a;
+  --accent: #8b5e3c;
+  --accent-hover: #6f4a2e;
+  --accent-text: #ffffff;
+  --badge-stock-bg: #e8f5e9;
+  --badge-stock-text: #2e7d32;
+  --badge-order-bg: #fff8e1;
+  --badge-order-text: #f57f17;
+  --badge-empty-bg: #f5f5f5;
+  --badge-empty-text: #9e9e9e;
+  --shadow: 0 2px 8px rgba(44, 35, 26, 0.08);
+  --shadow-hover: 0 6px 20px rgba(44, 35, 26, 0.14);
+  --radius: 10px;
+
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1, h2, h3 {
+  font-weight: 600;
+  color: var(--heading);
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
