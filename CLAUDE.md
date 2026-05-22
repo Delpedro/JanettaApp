@@ -88,11 +88,22 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Docker + `docker-compose.yml` in place
 - `.gitignore` covers `node_modules`, `.env`, `.claude/`, `BUGS.md`, `TDLR.md`
 - `server/.env.example` exists — actual `.env` not created yet (Turso/Cloudinary creds not set up)
-- Mock storefront homepage live at `:5173`: 3 product cards, PL/EN language toggle, warm craft-shop aesthetic
-- Files: `client/src/data/mockProducts.js`, `client/src/components/Header.jsx`, `client/src/components/ProductCard.jsx`
-- ~25 original files + new mock UI files staged and ready to commit — not pushed yet
+- `react-router-dom` installed, `BrowserRouter` wired in `main.jsx`
+- Routing: `/` → `HomePage`, `/product/:id` → `ProductDetailPage`
+- Homepage: 6 product cards, PL/EN toggle, warm craft-shop aesthetic — live at `:5173`
+- Product detail page: image (left), badge + name + price + description + stock qty + CTA (right). Bilingual. Fully responsive.
+- Product cards: image and name are clickable links to detail page
+- Pages live in `client/src/pages/`. Components in `client/src/components/`.
+- Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order)
 
-**Next concrete action:** Review mock storefront, then decide what page to build next (product detail? cart? admin?). Schema follows UI, not the other way around.
+**Schema signals surfaced so far by the mock UI:**
+- `name_pl`, `name_en`, `description_pl`, `description_en` — bilingual required at DB level
+- `price` — integer (zł), no decimals needed yet
+- `inStock` (bool), `madeToOrder` (bool), `stockQty` (int) — hybrid inventory confirmed
+- `image` — single URL for now; multi-image deferred (open question)
+- `id` — integer for now; slug needed for SEO later
+
+**Next concrete action:** Build mock cart (add-to-cart state, cart drawer/page, item list, total). This will surface checkout data requirements before touching the DB.
 
 ---
 
@@ -123,6 +134,7 @@ If any of those three fail, MVP is not done.
 - Shipping model (flat fee vs tiered vs weight-based)
 - Geographic scope (Poland-only vs EU vs worldwide)
 - Custom domain vs Vercel subdomain
+- Background removal on product images (Joanna's call — does the aesthetic need clean bg or authentic setting?)
 
 ---
 
@@ -143,6 +155,15 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Project scaffold complete: client (React/Vite) + server (Node/Express) + Docker + root dev scripts
 - 2026-05-22 — Deleted premature `ADMIN_GUIDE_EN/PL.md` and `TERMS_AND_CONDITIONS_TEMPLATE.md` (fiction, Phase 4 deliverables written too early)
 - 2026-05-22 — Deferred DB schema in favour of mock UI first — see real UI needs, then schema writes itself from real requirements
+- 2026-05-22 — Admin role split: Janetta = content only (upload products, set prices/descriptions); Del = technical (code, payments, bugs) — keeps admin UI dead simple
+- 2026-05-22 — Admin panel MVP scope: Add product, Edit product, Hide/unpublish — nothing else
+- 2026-05-22 — Image naming: server generates filename on upload (UUID/slug+timestamp), Janetta's phone filename discarded — zero friction
+- 2026-05-22 — Image pipeline: always store raw original in Cloudinary, apply transformations at display time — upload code and schema never need rebuilding regardless of future bg removal decision
+- 2026-05-22 — Background removal decision deferred — Joanna to decide if products need clean bg; parked in open questions
+- 2026-05-22 — Cloudinary confirmed as image host (locked, dropping imgbb option)
+- 2026-05-22 — Product detail page built (mock); react-router-dom added; routing live
+- 2026-05-22 — Card image + name link to detail page; "Add to cart" button stays on card (separate interactables, a11y safe)
+- 2026-05-22 — Pages in `client/src/pages/`, components stay in `client/src/components/`
 
 ---
 

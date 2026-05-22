@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+
 export default function ProductCard({ product, lang }) {
   const name = lang === 'pl' ? product.name_pl : product.name_en
   const description = lang === 'pl' ? product.description_pl : product.description_en
@@ -10,13 +12,17 @@ export default function ProductCard({ product, lang }) {
 
   return (
     <article className="product-card">
-      <div className="product-card__image-wrap">
-        <img src={product.image} alt={name} className="product-card__image" />
-        <span className={`badge ${badge.cls}`}>{badge.text}</span>
-      </div>
+      <Link to={`/product/${product.id}`} className="product-card__image-link">
+        <div className="product-card__image-wrap">
+          <img src={product.image} alt={name} className="product-card__image" />
+          <span className={`badge ${badge.cls}`}>{badge.text}</span>
+        </div>
+      </Link>
 
       <div className="product-card__body">
-        <h2 className="product-card__name">{name}</h2>
+        <Link to={`/product/${product.id}`} className="product-card__name-link">
+          <h2 className="product-card__name">{name}</h2>
+        </Link>
         <p className="product-card__desc">{description}</p>
 
         <div className="product-card__footer">
