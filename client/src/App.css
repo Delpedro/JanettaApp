@@ -864,3 +864,128 @@
   text-decoration: none;
   padding: 12px 28px;
 }
+
+/* ── Admin setup page ───────────────────────────── */
+.setup-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+
+.setup-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow);
+}
+
+.setup-title {
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.setup-sub {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 28px;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.setup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.setup-input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 15px;
+  color: var(--heading);
+  background: var(--surface);
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.setup-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.setup-input--error {
+  border-color: #d63031;
+}
+
+.setup-error {
+  font-size: 12px;
+  color: #d63031;
+}
+
+.setup-server-error {
+  font-size: 14px;
+  color: #d63031;
+}
+
+.setup-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.setup-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.setup-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.setup-check {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--badge-stock-bg);
+  color: var(--badge-stock-text);
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.setup-msg {
+  color: var(--text-light);
+  font-size: 15px;
+}
+
+.setup-msg--error {
+  color: #d63031;
+}

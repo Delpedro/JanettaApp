@@ -108,8 +108,13 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
 - **`POST /api/orders`** — live. Accepts guest checkout payload, writes to `orders` + `order_items`, decrements stock for stock-tracked products. UAT confirmed — order landed in Turso.
 - `CheckoutPage` now POSTs to real API. Loading state, server error handling, bilingual error strings.
+- **Auth:** `POST /api/auth/login` — live. Returns JWT (7d expiry) + `{ id, email, role }`. Wrong creds → 401. UAT confirmed.
+- **JWT middleware:** `server/src/middleware/auth.js` — `requireAuth` ready to drop on any admin route.
+- **First-run setup:** `GET /api/auth/setup/status` + `POST /api/auth/setup` — locks after first admin created. `/setup` page live at client, renders outside shop shell (no header/cart/footer). UAT confirmed — admin account created in Turso.
+- **Admin credentials:** Del's in 1Password. Janetta's TBD (when she's told about the project).
+- `server/db/create-admin.js` exists but is superseded by `/setup` page — can be deleted later.
 
-**Next concrete action:** Admin auth — `POST /api/auth/login` + JWT middleware.
+**Next concrete action:** Admin login page — `POST /api/auth/login` wired to `/admin/login` UI, JWT stored in localStorage, redirect to admin dashboard.
 
 ---
 
