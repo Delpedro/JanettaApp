@@ -94,16 +94,20 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Product detail page: image (left), badge + name + price + description + stock qty + CTA (right). Bilingual. Fully responsive.
 - Product cards: image and name are clickable links to detail page
 - Pages live in `client/src/pages/`. Components in `client/src/components/`.
-- Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order) — still used, will be replaced
+- Data: `client/src/data/mockProducts.js` exists but no longer used by any page — can be deleted later
 - Cart: `CartContext` (global state), `CartDrawer` (slides in from right), cart icon + badge in header. Add to cart wired on cards and detail page. Qty +/−, remove, running total. UAT confirmed.
 - Checkout: `CheckoutPage` at `/checkout`. Guest form (name, email, street, city, postal). Order summary sidebar. Client-side validation. Mock confirmation screen clears cart. Postal code is free-text (no format validation — supports all countries). UAT confirmed.
-- All pushed to GitHub (`main`) — 5 commits live
+- All pushed to GitHub (`main`) — 6 commits live
 - `BUGS.md` exists (local, gitignored) — BUG-001 logged: mock product images cross-assigned
 - **Turso DB live:** `jannettasapp` on `aws-eu-west-1`. 4 tables applied: `products`, `users`, `orders`, `order_items`
 - **DB schema:** `server/db/schema.sql` (version controlled)
-- **DB client:** `server/db/client.js` — `@libsql/client` wired, reads from `.env`
+- **DB client:** `server/db/client.js` — `@libsql/client` (latest) wired, reads from `.env`, dotenv loaded here to fix ESM import-order issue
+- **`GET /api/products`** — live, queries Turso, returns only published products, normalises to camelCase. UAT confirmed.
+- **`GET /api/products/:id`** — live, returns single product or 404.
+- **Seed:** `server/db/seed.js` — run once, idempotent, populated DB with 6 mock products. Images still served from `client/public/images/` (Cloudinary later).
+- `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
 
-**Next concrete action:** Build `GET /api/products` — first real API route, replaces mock data in the frontend.
+**Next concrete action:** Build `POST /api/orders` — wires up guest checkout to the DB.
 
 ---
 
@@ -170,6 +174,8 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Turso account created (delpedro), DB named `jannettasapp`, region eu-west-1
 - 2026-05-22 — DB schema applied: 4 tables (products, users, orders, order_items); schema.sql version controlled in server/db/
 - 2026-05-22 — Auth token stored in 1Password + server/.env (gitignored); .env.example has placeholders only
+- 2026-05-22 — GET /api/products live; seed script populated Turso; frontend drops mock data
+- 2026-05-22 — @libsql/client upgraded to latest (0.6.2 broke on Turso HTTP API); dotenv moved to client.js to fix ESM load order
 - 2026-05-22 — @libsql/client installed; server/db/client.js wired up; server boots clean
 
 ---
