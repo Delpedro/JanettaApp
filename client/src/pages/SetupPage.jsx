@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 
 export default function SetupPage() {
   const [status, setStatus]     = useState('loading')
@@ -69,8 +70,8 @@ export default function SetupPage() {
           </h1>
           <p className="setup-sub">
             {done
-              ? 'Your admin account is ready. Save your credentials somewhere safe.'
-              : 'An admin account already exists. Use the login page to sign in.'}
+              ? <>Your admin account is ready. <Link to="/admin/login">Go to login</Link>.</>
+              : <>An admin account already exists. <Link to="/admin/login">Sign in here</Link>.</>}
           </p>
         </div>
       </div>

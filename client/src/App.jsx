@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CheckoutPage from './pages/CheckoutPage'
 import SetupPage from './pages/SetupPage'
+import AdminLoginPage from './pages/AdminLoginPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
 import './App.css'
 
 function ShopShell() {
@@ -33,6 +35,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/setup" element={<SetupPage />} />
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
       <Route path="/*" element={<ShopShell />} />
     </Routes>
   )
