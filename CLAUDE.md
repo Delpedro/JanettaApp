@@ -96,6 +96,7 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Pages live in `client/src/pages/`. Components in `client/src/components/`.
 - Data: `client/src/data/mockProducts.js` (6 products, mix of in-stock / made-to-order)
 - Cart: `CartContext` (global state), `CartDrawer` (slides in from right), cart icon + badge in header. Add to cart wired on cards and detail page. Qty +/−, remove, running total. UAT confirmed.
+- Checkout: `CheckoutPage` at `/checkout`. Guest form (name, email, street, city, postal). Order summary sidebar. Client-side validation. Mock confirmation screen clears cart. Postal code is free-text (no format validation — supports all countries). UAT confirmed.
 - All pushed to GitHub (`main`) — 5 commits live
 - `BUGS.md` exists (local, gitignored) — BUG-001 logged: mock product images cross-assigned
 
@@ -105,9 +106,13 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - `inStock` (bool), `madeToOrder` (bool), `stockQty` (int) — hybrid inventory confirmed
 - `image` — single URL for now; multi-image deferred (open question)
 - `id` — integer for now; slug needed for SEO later
-- Cart line items: `product_id`, `qty`, `price_snapshot` (price at time of order) — surfaces need to snapshot price at checkout, not read live from product
+- Cart line items: `product_id`, `qty`, `price_snapshot` — price snapshotted at checkout, not read live
+- `orders`: `customer_name`, `customer_email`, `address_street`, `address_city`, `address_postal`, `total`, `status`, `created_at`
+- `order_items`: `order_id`, `product_id`, `qty`, `price_snapshot`, `name_pl`, `name_en`
 
-**Next concrete action:** Build mock guest checkout form (name, email, address, order summary, place order CTA). This will surface the full schema for orders + order_items before touching the DB.
+**Phase 2 mock UI is complete.** All storefront screens built and UAT'd. Schema signals fully surfaced.
+
+**Next concrete action:** Design and write the DB schema (Turso/SQLite). Use the schema signals above — this is now a direct read-off, not guesswork.
 
 ---
 
@@ -169,6 +174,8 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Product detail page built (mock); react-router-dom added; routing live
 - 2026-05-22 — Card image + name link to detail page; "Add to cart" button stays on card (separate interactables, a11y safe)
 - 2026-05-22 — Pages in `client/src/pages/`, components stay in `client/src/components/`
+- 2026-05-22 — Postal code stored and validated as free-text — no format enforcement, supports all countries (IE, PL, UK, US, etc.)
+- 2026-05-22 — Mock checkout page built and UAT'd; Phase 2 mock UI complete
 
 ---
 

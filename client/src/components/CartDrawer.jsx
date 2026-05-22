@@ -1,6 +1,8 @@
+import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 
 export default function CartDrawer({ lang, onClose }) {
+  const navigate = useNavigate()
   const { items, removeItem, updateQty, total } = useCart()
 
   const t = {
@@ -82,6 +84,7 @@ export default function CartDrawer({ lang, onClose }) {
           <button
             className="btn btn--primary btn--checkout"
             disabled={items.length === 0}
+            onClick={() => { onClose(); navigate('/checkout') }}
           >
             {t.checkout}
           </button>

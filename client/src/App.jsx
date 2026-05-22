@@ -5,6 +5,7 @@ import Header from './components/Header'
 import CartDrawer from './components/CartDrawer'
 import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
+import CheckoutPage from './pages/CheckoutPage'
 import './App.css'
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage lang={lang} />} />
         <Route path="/product/:id" element={<ProductDetailPage lang={lang} />} />
+        <Route path="/checkout" element={<CheckoutPage lang={lang} />} />
       </Routes>
 
       <footer className="site-footer">
