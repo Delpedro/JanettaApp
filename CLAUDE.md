@@ -117,8 +117,10 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **Admin dashboard stub:** `/admin/dashboard` — reads JWT from localStorage, decodes email from payload, shows signed-in state + sign out button. No token → redirects to `/admin/login`. UAT confirmed.
 - `/setup` success screen now links to `/admin/login`.
 - Both admin routes render outside `ShopShell` (no header/cart/footer) — same pattern as `/setup`.
+- **Admin dashboard (real):** product list with Visible/Hidden toggle (optimistic, persists to DB), EN/PL toggle, "← Shop" link, Add admin user form. `GET /api/admin/products`, `PATCH /api/admin/products/:id`, `POST /api/admin/users` — all requireAuth guarded. `server/src/routes/adminProducts.js` mounted at `/api/admin`.
+- **Vite pinned** to port 5173 (`strictPort: true`). Shop footer has small "Admin" link.
 
-**Next concrete action:** Real admin dashboard — product list (name, price, stock, published toggle), wired to `GET /api/products` (all products, not just published). Foundation for add/edit/hide.
+**Next concrete action:** Rebuild admin as a proper multi-section layout (tabbed or child pages) before adding any more features. Current single-page dump is not acceptable.
 
 ---
 
@@ -185,6 +187,7 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-22 — Turso account created (delpedro), DB named `jannettasapp`, region eu-west-1
 - 2026-05-22 — DB schema applied: 4 tables (products, users, orders, order_items); schema.sql version controlled in server/db/
 - 2026-05-22 — Auth token stored in 1Password + server/.env (gitignored); .env.example has placeholders only
+- 2026-05-22 — Admin must be rebuilt as proper multi-section layout (tabs or child pages) before adding more features — current single-page dump is not good enough; "Add admin user" bolted to bottom of product list is wrong
 - 2026-05-22 — Admin login page + dashboard stub live; JWT stored in localStorage; auth flow UAT confirmed
 - 2026-05-22 — GET /api/products live; seed script populated Turso; frontend drops mock data
 - 2026-05-22 — @libsql/client upgraded to latest (0.6.2 broke on Turso HTTP API); dotenv moved to client.js to fix ESM load order

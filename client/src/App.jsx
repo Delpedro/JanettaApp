@@ -26,6 +26,7 @@ function ShopShell() {
       </Routes>
       <footer className="site-footer">
         <p>© 2026 Janetta</p>
+        <a href="/admin/login" className="admin-footer-link">Admin</a>
       </footer>
     </CartProvider>
   )

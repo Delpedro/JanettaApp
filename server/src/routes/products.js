@@ -15,6 +15,7 @@ function normalize(row) {
     inStock: Boolean(row.in_stock),
     madeToOrder: Boolean(row.made_to_order),
     stockQty: row.stock_qty,
+    published: Boolean(row.published),
   };
 }
 
