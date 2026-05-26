@@ -95,6 +95,13 @@ router.patch('/password', requireAuth, async (req, res) => {
       sql: 'UPDATE users SET password_hash = ?, force_password_reset = 0, token_version = token_version + 1 WHERE id = ?',
       args: [hash, req.user.id],
     });
+    const { rows } = await db.execute({ sql: 'SELECT token_version FROM users WHERE id = ?', args: [req.user.id] });
+    const newToken = jwt.sign(
+      { id: req.user.id, email: req.user.email, role: req.user.role, tv: Number(rows[0].token_version) },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    res.cookie('adminToken', newToken, COOKIE_OPTS);
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
