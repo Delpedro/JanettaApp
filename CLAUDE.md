@@ -199,6 +199,7 @@ If any of those three fail, MVP is not done.
 - Background removal on product images (Joanna's call — does the aesthetic need clean bg or authentic setting?)
 - Delivery tracking — how Janetta tracks and fulfils orders. Likely outside the app at first (WhatsApp, notepad, Polish Post). Options: manual (she marks orders done herself), InPost parcel lockers (huge in Poland, label printing), Poczta Polska. Packaging also TBD — branding, inserts, protection for fragile items. Conversation for post-reveal with Janetta + Joanna.
 - Marketing — Facebook, Instagram, TikTok. Out of scope for the app. Post-reveal conversation with Joanna.
+- WhatsApp business group — Del, Joanna, Janetta. Janetta contacts Del directly via WhatsApp. Create a dedicated WhatsApp Business account/group for the three of them for order issues, support, and coordination. Set up post-reveal.
 
 ---
 
