@@ -61,8 +61,8 @@ async function uploadToCloudinary(file) {
     method: 'POST',
     body: formData,
   })
-  if (!uploadRes.ok) throw new Error('upload')
   const data = await uploadRes.json()
+  if (!uploadRes.ok) throw new Error(data?.error?.message || 'upload')
   return data.secure_url
 }
 
@@ -98,8 +98,8 @@ export default function AdminAddProductPage() {
     if (imageFile) {
       try {
         imageUrl = await uploadToCloudinary(imageFile)
-      } catch {
-        setMsg(tx.imageError)
+      } catch (err) {
+        setMsg(`${tx.imageError} (${err.message})`)
         setIsError(true)
         setSaving(false)
         return
