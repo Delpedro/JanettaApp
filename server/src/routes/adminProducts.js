@@ -166,8 +166,8 @@ router.patch('/products/:id', async (req, res) => {
             made_to_order=?, in_stock=?, stock_qty=?, image=?, published=? WHERE id=?`,
       args: [name_pl.trim(), name_en, description_pl.trim(), description_en, priceInt, mto, inStock, qty, image || null, pub, req.params.id],
     });
+    if (oldImage && oldImage !== image) await deleteImage(oldImage);
     res.json({ ok: true });
-    if (oldImage && oldImage !== image) deleteImage(oldImage);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update product' });
@@ -179,8 +179,8 @@ router.delete('/products/:id', async (req, res) => {
   try {
     const { rows } = await db.execute({ sql: 'SELECT image FROM products WHERE id = ?', args: [req.params.id] });
     await db.execute({ sql: 'DELETE FROM products WHERE id = ?', args: [req.params.id] });
+    if (rows[0]?.image) await deleteImage(rows[0].image);
     res.json({ ok: true });
-    if (rows[0]?.image) deleteImage(rows[0].image);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete product' });
