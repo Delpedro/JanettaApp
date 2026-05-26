@@ -14,6 +14,7 @@ import AdminProductsPage from './pages/AdminProductsPage'
 import AdminAddProductPage from './pages/AdminAddProductPage'
 import AdminEditProductPage from './pages/AdminEditProductPage'
 import AdminUsersPage from './pages/AdminUsersPage'
+import AdminHelpPage from './pages/AdminHelpPage'
 import './App.css'
 
 function ShopShell() {
@@ -50,6 +51,7 @@ export default function App() {
         <Route path="add-product" element={<AdminAddProductPage />} />
         <Route path="edit-product/:id" element={<AdminEditProductPage />} />
         <Route path="users" element={<AdminUsersPage />} />
+        <Route path="help" element={<AdminHelpPage />} />
       </Route>
       <Route path="/*" element={<ShopShell />} />
     </Routes>

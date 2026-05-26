@@ -362,3 +362,31 @@
   opacity: 0.5;
   cursor: default;
 }
+
+/* ── Help page ── */
+.admin-help {
+  max-width: 600px;
+}
+
+.admin-help-section {
+  margin-bottom: 2rem;
+}
+
+.admin-help-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3d2b1f;
+  margin: 0 0 0.6rem;
+}
+
+.admin-help-steps {
+  margin: 0;
+  padding-left: 1.4rem;
+}
+
+.admin-help-step {
+  font-size: 0.95rem;
+  color: #4a3728;
+  line-height: 1.6;
+  margin-bottom: 0.35rem;
+}

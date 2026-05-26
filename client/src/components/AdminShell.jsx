@@ -3,8 +3,8 @@ import { useNavigate, Outlet, NavLink } from 'react-router-dom'
 import './AdminShell.css'
 
 const t = {
-  en: { shop: '← Shop', products: 'Products', addProduct: 'Add Product', users: 'Users', signOut: 'Sign out' },
-  pl: { shop: '← Sklep', products: 'Produkty', addProduct: 'Dodaj produkt', users: 'Użytkownicy', signOut: 'Wyloguj' },
+  en: { shop: '← Shop', products: 'Products', addProduct: 'Add Product', users: 'Users', help: 'Help', signOut: 'Sign out' },
+  pl: { shop: '← Sklep', products: 'Produkty', addProduct: 'Dodaj produkt', users: 'Użytkownicy', help: 'Pomoc', signOut: 'Wyloguj' },
 }
 
 export default function AdminShell() {
@@ -51,6 +51,7 @@ export default function AdminShell() {
           <NavLink to="/admin/products" className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}>{tx.products}</NavLink>
           <NavLink to="/admin/add-product" className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}>{tx.addProduct}</NavLink>
           <NavLink to="/admin/users" className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}>{tx.users}</NavLink>
+          <NavLink to="/admin/help" className={({ isActive }) => `admin-nav-link${isActive ? ' active' : ''}`}>{tx.help}</NavLink>
         </nav>
       </header>
       <main className="admin-main">
