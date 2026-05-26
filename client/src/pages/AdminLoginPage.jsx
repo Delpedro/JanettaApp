@@ -39,7 +39,13 @@ export default function AdminLoginPage() {
       if (!res.ok) throw new Error()
       const data = await res.json()
       localStorage.setItem('adminToken', data.token)
-      navigate('/admin/dashboard')
+      if (data.user?.forcePasswordReset) {
+        localStorage.setItem('adminForceReset', '1')
+        navigate('/admin/change-password')
+      } else {
+        localStorage.removeItem('adminForceReset')
+        navigate('/admin/products')
+      }
     } catch {
       setServerError('Something went wrong. Please try again.')
     } finally {

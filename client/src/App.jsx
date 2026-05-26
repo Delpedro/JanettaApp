@@ -1,14 +1,18 @@
 import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { CartProvider } from './context/CartContext'
 import Header from './components/Header'
 import CartDrawer from './components/CartDrawer'
+import AdminShell from './components/AdminShell'
 import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CheckoutPage from './pages/CheckoutPage'
 import SetupPage from './pages/SetupPage'
 import AdminLoginPage from './pages/AdminLoginPage'
-import AdminDashboardPage from './pages/AdminDashboardPage'
+import AdminChangePasswordPage from './pages/AdminChangePasswordPage'
+import AdminProductsPage from './pages/AdminProductsPage'
+import AdminAddProductPage from './pages/AdminAddProductPage'
+import AdminUsersPage from './pages/AdminUsersPage'
 import './App.css'
 
 function ShopShell() {
@@ -37,7 +41,14 @@ export default function App() {
     <Routes>
       <Route path="/setup" element={<SetupPage />} />
       <Route path="/admin/login" element={<AdminLoginPage />} />
-      <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+      <Route path="/admin/dashboard" element={<Navigate to="/admin/products" replace />} />
+      <Route path="/admin/change-password" element={<AdminChangePasswordPage />} />
+      <Route path="/admin" element={<AdminShell />}>
+        <Route index element={<Navigate to="/admin/products" replace />} />
+        <Route path="products" element={<AdminProductsPage />} />
+        <Route path="add-product" element={<AdminAddProductPage />} />
+        <Route path="users" element={<AdminUsersPage />} />
+      </Route>
       <Route path="/*" element={<ShopShell />} />
     </Routes>
   )

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import db from '../../db/client.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -31,10 +32,37 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+    res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        forcePasswordReset: Boolean(user.force_password_reset),
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+router.patch('/password', requireAuth, async (req, res) => {
+  const { newPassword } = req.body;
+  if (!newPassword || newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+
+  try {
+    const hash = await bcrypt.hash(newPassword, 12);
+    await db.execute({
+      sql: 'UPDATE users SET password_hash = ?, force_password_reset = 0 WHERE id = ?',
+      args: [hash, req.user.id],
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Password update failed' });
   }
 });
 

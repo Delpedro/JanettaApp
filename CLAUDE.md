@@ -117,10 +117,17 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **Admin dashboard stub:** `/admin/dashboard` — reads JWT from localStorage, decodes email from payload, shows signed-in state + sign out button. No token → redirects to `/admin/login`. UAT confirmed.
 - `/setup` success screen now links to `/admin/login`.
 - Both admin routes render outside `ShopShell` (no header/cart/footer) — same pattern as `/setup`.
-- **Admin dashboard (real):** product list with Visible/Hidden toggle (optimistic, persists to DB), EN/PL toggle, "← Shop" link, Add admin user form. `GET /api/admin/products`, `PATCH /api/admin/products/:id`, `POST /api/admin/users` — all requireAuth guarded. `server/src/routes/adminProducts.js` mounted at `/api/admin`.
 - **Vite pinned** to port 5173 (`strictPort: true`). Shop footer has small "Admin" link.
+- **Admin rebuilt** as proper multi-section layout. `AdminShell` component (sticky header, tab nav: Products | Add Product | Users, lang toggle, sign out). Child routes: `/admin/products`, `/admin/add-product`, `/admin/users`. `/admin/dashboard` redirects to `/admin/products`. Auth check + `force_password_reset` guard in `AdminShell`.
+- **Add Product:** Polish-only form (name, description, price, photo, made-to-order toggle, stock qty, publish toggle). Auto-translates PL→EN via MyMemory API (free, no key needed). Image uploads directly from browser to Cloudinary (signed upload — server generates signature via `GET /api/admin/upload-signature`). `POST /api/admin/products` saves to Turso.
+- **Cloudinary wired:** `server/src/lib/cloudinary.js`. Cloud name: `dvcd99acy`. All 6 seed product images migrated to Cloudinary via `server/db/migrate-images.js`. Turso updated with Cloudinary URLs.
+- **Product data fixed:** All 6 products have correct names + descriptions matching real Janetta photos. BUG-001 resolved.
+- **Forced password reset:** `force_password_reset` column on `users` table. New users created via admin always have it set to 1. Login response includes `forcePasswordReset` flag. If true → stored in `localStorage` as `adminForceReset` → redirects to `/admin/change-password`. `AdminChangePasswordPage` is bilingual (PL/EN). `PATCH /api/auth/password` updates hash + clears flag. `AdminShell` blocks access until flag is cleared.
+- **MyMemory translation:** `server/src/lib/translate.js` — no API key, free, called server-side on every `POST /api/admin/products`.
+- **`multer` + `sharp` installed** on server (image handling). `upload.js` middleware exists but not used on the add-product route (direct-to-Cloudinary bypasses it).
+- **`server/.env`** now needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (in addition to existing vars). Add same to Vercel env vars.
 
-**Next concrete action:** Rebuild admin as a proper multi-section layout (tabbed or child pages) before adding any more features. Current single-page dump is not acceptable.
+**Next concrete action:** UAT full admin flow (Products tab → Add Product with real photo and Polish text → confirm translation + Cloudinary upload + Turso write → forced password reset on new user). Then payments (Stripe + PayPal).
 
 ---
 
@@ -159,6 +166,11 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-26 — MyMemory used for PL→EN auto-translation (free, no key) — DeepL killed free tier, Anthropic API requires separate billing from claude.ai subscription
+- 2026-05-26 — Cloudinary signed upload (browser→Cloudinary direct) — Vercel serverless hard limit is 4.5MB, phone photos exceed this, so image bytes never route through server
+- 2026-05-26 — Admin rebuilt as tabbed multi-section layout (Products | Add Product | Users) — single-page dump was not acceptable
+- 2026-05-26 — Add Product form is Polish-only — Janetta cannot speak English, translation is automatic
+- 2026-05-26 — Forced password reset on all admin-created users — temp password sent via WhatsApp, user must set their own on first login
 - 2026-05-22 — Cart drawer with total at bottom confirmed — Del's instinct was to show total earlier in the flow, but drawer pattern is cleaner; confirmed after UAT
 - 2026-05-22 — Repo is public, not private — handmade crafts shop, no reason to hide it
 - 2026-05-22 — `CLAUDE.md` is the single source of truth (no separate charter/TLDR/instructions) — fewer files, lower context cost, same effect
