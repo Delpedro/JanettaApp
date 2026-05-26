@@ -2,7 +2,7 @@ import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../../db/client.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
-import { generateUploadSignature } from '../lib/cloudinary.js';
+import { generateUploadSignature, deleteImage } from '../lib/cloudinary.js';
 import { translateToEnglish } from '../lib/translate.js';
 
 const router = Router();
@@ -158,12 +158,16 @@ router.patch('/products/:id', async (req, res) => {
   const pub = published ? 1 : 0;
 
   try {
+    const { rows: existing } = await db.execute({ sql: 'SELECT image FROM products WHERE id = ?', args: [req.params.id] });
+    const oldImage = existing[0]?.image || null;
+
     await db.execute({
       sql: `UPDATE products SET name_pl=?, name_en=?, description_pl=?, description_en=?, price=?,
             made_to_order=?, in_stock=?, stock_qty=?, image=?, published=? WHERE id=?`,
       args: [name_pl.trim(), name_en, description_pl.trim(), description_en, priceInt, mto, inStock, qty, image || null, pub, req.params.id],
     });
     res.json({ ok: true });
+    if (oldImage && oldImage !== image) deleteImage(oldImage);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update product' });
@@ -173,8 +177,10 @@ router.patch('/products/:id', async (req, res) => {
 router.delete('/products/:id', async (req, res) => {
   if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid product ID' });
   try {
+    const { rows } = await db.execute({ sql: 'SELECT image FROM products WHERE id = ?', args: [req.params.id] });
     await db.execute({ sql: 'DELETE FROM products WHERE id = ?', args: [req.params.id] });
     res.json({ ok: true });
+    if (rows[0]?.image) deleteImage(rows[0].image);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to delete product' });
