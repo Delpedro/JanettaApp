@@ -5,15 +5,25 @@ const content = {
     title: 'Help',
     sections: [
       {
+        heading: 'Logging in',
+        steps: [
+          'On your phone or laptop, go to the shop website and scroll to the bottom — click "Admin".',
+          'Enter your email address and password, then tap Sign in.',
+          'You will stay logged in for 7 days. After that, log in again.',
+          'If you forget your password, call Joanna. She will call Del.',
+        ],
+      },
+      {
         heading: 'Adding a new product',
         steps: [
-          'Click Add Product at the top of the page.',
-          'Fill in the product name and description in Polish.',
+          'Tap Add Product at the top of the page.',
+          'Fill in the product name and description in Polish — English is done automatically.',
           'Enter the price in złoty (whole numbers only, e.g. 45).',
           'Tap the photo area to choose a photo from your phone or computer.',
           'Choose whether the product is made to order or has a set stock quantity.',
+          'If it has a stock quantity, enter how many you have available.',
           'Tick "Publish immediately" if you want it visible in the shop straight away.',
-          'Tap Add Product. The English translation is done automatically.',
+          'Tap Add Product. It will appear in your product list.',
         ],
       },
       {
@@ -21,8 +31,9 @@ const content = {
         steps: [
           'Go to Products at the top.',
           'Find the product and click Edit.',
-          'Make your changes — name, description, price, or swap the photo.',
+          'Change the name, description, price, stock quantity, or swap the photo.',
           'Tap Save changes. The page returns to your product list when saved.',
+          'If you change the name, the English translation updates automatically.',
         ],
       },
       {
@@ -32,6 +43,7 @@ const content = {
           'Click the Visible button next to the product.',
           'It changes to Hidden — customers can no longer see it.',
           'Click it again to make it visible again.',
+          'Use this if a product is temporarily out of stock or not ready yet.',
         ],
       },
       {
@@ -44,25 +56,59 @@ const content = {
         ],
       },
       {
-        heading: 'Tips for photos',
+        heading: 'Stock and made-to-order products',
         steps: [
-          'Take photos in good natural daylight.',
-          'Hold the phone steady and close to the product.',
-          'The photo uploads directly from your phone — no need to transfer to a computer first.',
+          'Stock products — you have a set number available. The shop automatically stops selling when stock runs out.',
+          'Made to order — no stock limit. Customers can always order, and you make the item after they pay.',
+          'You can change a product between stock and made-to-order at any time by editing it.',
+          'If a stock product is running low, update the quantity in Edit before it sells out.',
         ],
       },
       {
-        heading: 'Orders and customer emails',
+        heading: 'Changing your password',
         steps: [
-          'When a customer pays, they automatically receive a confirmation email.',
-          'The email is in Polish and includes their order number, items, total, and delivery address.',
-          'You do not need to do anything — it sends automatically.',
-          'You will not see orders in the admin panel yet — this is coming soon.',
+          'Log in to the admin panel.',
+          'This option will be available in your account settings — coming soon.',
+          'For now, call Joanna if you need your password changed.',
+        ],
+      },
+      {
+        heading: 'When a customer places an order',
+        steps: [
+          'The customer pays online by card (or BLIK in Poland).',
+          'They automatically receive a confirmation email in Polish with their order details.',
+          'At the moment, you do not receive a separate notification — this is being added soon.',
+          'For now, check with Joanna if you are unsure whether an order has come in.',
+        ],
+      },
+      {
+        heading: 'Seeing your payments (Stripe)',
+        steps: [
+          'All payments go through Stripe — a secure payment service.',
+          'You can log in to your Stripe account at stripe.com to see all payments, payouts, and your balance.',
+          'Stripe transfers money to your bank account automatically (usually within 2–3 working days).',
+          'If you have any questions about a payment, contact Joanna.',
+        ],
+      },
+      {
+        heading: 'Tips for photos',
+        steps: [
+          'Take photos in good natural daylight — near a window is ideal.',
+          'Hold the phone steady and close to the product.',
+          'Photograph the product on its own against a simple background.',
+          'Take a few shots and pick the sharpest one.',
+          'The photo uploads directly from your phone — no need to transfer to a computer first.',
+          'Landscape (horizontal) photos work best on the shop.',
         ],
       },
       {
         heading: 'Something not working?',
-        steps: ['Call Joanna. She will call Del.'],
+        steps: [
+          'Try refreshing the page first.',
+          'If the problem continues, note what you were doing and what happened.',
+          'Call Joanna. She will contact Del.',
+          'Do not try to fix anything yourself — just note the issue and report it.',
+        ],
       },
     ],
   },
@@ -70,15 +116,25 @@ const content = {
     title: 'Pomoc',
     sections: [
       {
+        heading: 'Logowanie',
+        steps: [
+          'Na telefonie lub laptopie wejdź na stronę sklepu, przewiń na dół i kliknij „Admin".',
+          'Wpisz swój adres e-mail i hasło, a następnie naciśnij Zaloguj się.',
+          'Pozostaniesz zalogowana przez 7 dni. Po tym czasie zaloguj się ponownie.',
+          'Jeśli zapomnisz hasła, zadzwoń do Joanny. Ona skontaktuje się z Delem.',
+        ],
+      },
+      {
         heading: 'Dodawanie nowego produktu',
         steps: [
-          'Kliknij Dodaj produkt na górze strony.',
-          'Wpisz nazwę i opis produktu po polsku.',
+          'Naciśnij Dodaj produkt na górze strony.',
+          'Wpisz nazwę i opis produktu po polsku — tłumaczenie na angielski odbywa się automatycznie.',
           'Podaj cenę w złotych (tylko całe liczby, np. 45).',
           'Dotknij pola ze zdjęciem, aby wybrać zdjęcie z telefonu lub komputera.',
           'Wybierz, czy produkt jest na zamówienie, czy ma określoną ilość w magazynie.',
-          'Zaznacz „Opublikuj od razu", jeśli chcesz, aby produkt był od razu widoczny w sklepie.',
-          'Naciśnij Dodaj produkt. Tłumaczenie na angielski odbywa się automatycznie.',
+          'Jeśli masz określoną liczbę sztuk, wpisz ile ich masz.',
+          'Zaznacz „Opublikuj od razu", jeśli chcesz, aby produkt był widoczny w sklepie natychmiast.',
+          'Naciśnij Dodaj produkt. Pojawi się na liście produktów.',
         ],
       },
       {
@@ -86,8 +142,9 @@ const content = {
         steps: [
           'Przejdź do zakładki Produkty na górze.',
           'Znajdź produkt i kliknij Edytuj.',
-          'Wprowadź zmiany — nazwę, opis, cenę lub zamień zdjęcie.',
+          'Zmień nazwę, opis, cenę, ilość w magazynie lub zamień zdjęcie.',
           'Naciśnij Zapisz zmiany. Strona wróci do listy produktów po zapisaniu.',
+          'Jeśli zmienisz nazwę, tłumaczenie na angielski zaktualizuje się automatycznie.',
         ],
       },
       {
@@ -97,6 +154,7 @@ const content = {
           'Kliknij przycisk Widoczny obok produktu.',
           'Zmieni się na Ukryty — klienci nie będą go widzieć.',
           'Kliknij ponownie, aby znów był widoczny.',
+          'Użyj tej opcji, jeśli produkt jest chwilowo niedostępny lub nie jest jeszcze gotowy.',
         ],
       },
       {
@@ -109,25 +167,59 @@ const content = {
         ],
       },
       {
-        heading: 'Wskazówki dotyczące zdjęć',
+        heading: 'Produkty z zapasem i na zamówienie',
         steps: [
-          'Fotografuj w dobrym naturalnym świetle.',
-          'Trzymaj telefon nieruchomo i blisko produktu.',
-          'Zdjęcie wysyła się bezpośrednio z telefonu — nie trzeba wcześniej przenosić go na komputer.',
+          'Produkty z zapasem — masz określoną liczbę sztuk. Sklep automatycznie zatrzymuje sprzedaż, gdy zapas się wyczerpie.',
+          'Na zamówienie — bez limitu. Klienci mogą zawsze zamawiać, a Ty robisz produkt po otrzymaniu płatności.',
+          'Możesz zmieniać typ produktu w dowolnym momencie poprzez edycję.',
+          'Jeśli zapas się kończy, zaktualizuj ilość w Edytuj, zanim produkt się wyprzeda.',
         ],
       },
       {
-        heading: 'Zamówienia i e-maile do klientów',
+        heading: 'Zmiana hasła',
         steps: [
-          'Gdy klient zapłaci, automatycznie otrzymuje e-mail z potwierdzeniem zamówienia.',
-          'E-mail jest po polsku i zawiera numer zamówienia, produkty, łączną kwotę oraz adres dostawy.',
-          'Nie musisz nic robić — wysyłka odbywa się automatycznie.',
-          'Zamówienia nie są jeszcze widoczne w panelu administracyjnym — ta funkcja pojawi się wkrótce.',
+          'Zaloguj się do panelu administracyjnego.',
+          'Ta opcja będzie dostępna w ustawieniach konta — wkrótce.',
+          'Na razie zadzwoń do Joanny, jeśli potrzebujesz zmiany hasła.',
+        ],
+      },
+      {
+        heading: 'Gdy klient składa zamówienie',
+        steps: [
+          'Klient płaci online kartą (lub BLIK-iem).',
+          'Automatycznie otrzymuje e-mail z potwierdzeniem zamówienia po polsku ze szczegółami.',
+          'Na razie Ty nie otrzymujesz osobnego powiadomienia — ta funkcja jest wkrótce dodawana.',
+          'Na razie sprawdzaj z Joanną, jeśli nie jesteś pewna czy wpłynęło zamówienie.',
+        ],
+      },
+      {
+        heading: 'Przeglądanie płatności (Stripe)',
+        steps: [
+          'Wszystkie płatności przechodzą przez Stripe — bezpieczny serwis płatniczy.',
+          'Możesz zalogować się na swoje konto Stripe na stripe.com, aby zobaczyć płatności, wypłaty i saldo.',
+          'Stripe automatycznie przelewa pieniądze na Twoje konto bankowe (zazwyczaj w ciągu 2–3 dni roboczych).',
+          'W razie pytań dotyczących płatności, skontaktuj się z Joanną.',
+        ],
+      },
+      {
+        heading: 'Wskazówki dotyczące zdjęć',
+        steps: [
+          'Fotografuj w dobrym naturalnym świetle — najlepiej przy oknie.',
+          'Trzymaj telefon nieruchomo i blisko produktu.',
+          'Fotografuj produkt na prostym tle, bez zbędnych przedmiotów w tle.',
+          'Zrób kilka zdjęć i wybierz najostrzejsze.',
+          'Zdjęcie wysyła się bezpośrednio z telefonu — nie trzeba wcześniej przenosić go na komputer.',
+          'Zdjęcia poziome (poziome ujęcie) wyglądają najlepiej w sklepie.',
         ],
       },
       {
         heading: 'Coś nie działa?',
-        steps: ['Zadzwoń do Joanny. Ona zadzwoni do Dela.'],
+        steps: [
+          'Najpierw spróbuj odświeżyć stronę.',
+          'Jeśli problem nadal występuje, zanotuj co robiłaś i co się stało.',
+          'Zadzwoń do Joanny. Ona skontaktuje się z Delem.',
+          'Nie próbuj niczego naprawiać samodzielnie — po prostu zanotuj problem i zgłoś go.',
+        ],
       },
     ],
   },

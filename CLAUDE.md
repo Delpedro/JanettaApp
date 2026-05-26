@@ -150,11 +150,22 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **UAT confirmed end-to-end:** Payment → webhook → order paid → email in inbox. Live on `janetta-app.vercel.app`.
 - **Stripe account owner:** Janetta. Del's sandbox is dev only. Real account set up by Janetta when she says yes to the project.
 
+**Help page — what's covered vs what's missing:**
+- Covered: login, add product, edit product, hide product, delete product, stock vs made-to-order, change password (placeholder), orders (customer email), Stripe payments, photo tips, something not working.
+- Missing (not built yet — build before handover):
+  - Order notifications to Janetta — she currently gets no alert when an order comes in. Needs: email to Janetta on every paid order.
+  - Order list in admin — Janetta cannot see incoming orders in the panel yet.
+  - Self-service password reset — currently "call Joanna". Needs a forgot-password flow.
+  - Discounts / promotional pricing — not built. Parked until post-reveal.
+  - Marketing guidance (Facebook, Instagram, TikTok) — out of scope for the app itself. Separate conversation with Joanna post-reveal.
+
 **Next concrete action:**
 1. UI/layout overhaul — Del not happy with storefront look
-2. Remove `POST /api/orders` — old route, bypasses Stripe, fraud vector
-3. Self-service password reset (lower urgency)
-4. Domain + Resend domain verification (when Janetta says yes)
+2. Order notification email to Janetta — she needs to know when an order comes in
+3. Remove `POST /api/orders` — old route, bypasses Stripe, fraud vector
+4. Order list in admin panel
+5. Self-service password reset (lower urgency)
+6. Domain + Resend domain verification (when Janetta says yes)
 
 ---
 
