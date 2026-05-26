@@ -33,17 +33,15 @@ export default function AdminLoginPage() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email: form.email.trim().toLowerCase(), password: form.password }),
       })
       if (res.status === 401) { setServerError('Invalid email or password.'); return }
       if (!res.ok) throw new Error()
       const data = await res.json()
-      localStorage.setItem('adminToken', data.token)
       if (data.user?.forcePasswordReset) {
-        localStorage.setItem('adminForceReset', '1')
         navigate('/admin/change-password')
       } else {
-        localStorage.removeItem('adminForceReset')
         navigate('/admin/products')
       }
     } catch {

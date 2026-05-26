@@ -45,10 +45,8 @@ const EMPTY = {
   published: false,
 }
 
-async function uploadToCloudinary(file, token) {
-  const sigRes = await fetch('/api/admin/upload-signature', {
-    headers: { Authorization: `Bearer ${token}` },
-  })
+async function uploadToCloudinary(file) {
+  const sigRes = await fetch('/api/admin/upload-signature', { credentials: 'include' })
   if (!sigRes.ok) throw new Error('signature')
   const { timestamp, signature, api_key, cloud_name } = await sigRes.json()
 
@@ -69,7 +67,7 @@ async function uploadToCloudinary(file, token) {
 }
 
 export default function AdminAddProductPage() {
-  const { getToken, lang } = useOutletContext()
+  const { lang } = useOutletContext()
   const [form, setForm] = useState(EMPTY)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
@@ -93,15 +91,13 @@ export default function AdminAddProductPage() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const token = getToken()
-    if (!token) return
     setSaving(true)
     setMsg('')
 
     let imageUrl = null
     if (imageFile) {
       try {
-        imageUrl = await uploadToCloudinary(imageFile, token)
+        imageUrl = await uploadToCloudinary(imageFile)
       } catch {
         setMsg(tx.imageError)
         setIsError(true)
@@ -113,10 +109,8 @@ export default function AdminAddProductPage() {
     try {
       const res = await fetch('/api/admin/products', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           name_pl: form.name_pl.trim(),
           description_pl: form.description_pl.trim(),

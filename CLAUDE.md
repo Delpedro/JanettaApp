@@ -108,26 +108,31 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
 - **`POST /api/orders`** — live. Accepts guest checkout payload, writes to `orders` + `order_items`, decrements stock for stock-tracked products. UAT confirmed — order landed in Turso.
 - `CheckoutPage` now POSTs to real API. Loading state, server error handling, bilingual error strings.
-- **Auth:** `POST /api/auth/login` — live. Returns JWT (7d expiry) + `{ id, email, role }`. Wrong creds → 401. UAT confirmed.
-- **JWT middleware:** `server/src/middleware/auth.js` — `requireAuth` ready to drop on any admin route.
-- **First-run setup:** `GET /api/auth/setup/status` + `POST /api/auth/setup` — locks after first admin created. `/setup` page live at client, renders outside shop shell (no header/cart/footer). UAT confirmed — admin account created in Turso.
+- **Auth:** `POST /api/auth/login` — live. Sets httpOnly cookie (`adminToken`, 7d, SameSite=Strict, Secure in prod). Returns `{ user: { id, email, role, forcePasswordReset } }`. Wrong creds → 401. UAT confirmed.
+- **JWT middleware:** `server/src/middleware/auth.js` — `requireAuth` reads from cookie. `requireAdmin` checks `role === 'admin'`. Both applied router-level to all `/api/admin/*` routes.
+- **`GET /api/auth/me`** — returns current user from cookie. Used by `AdminShell` on mount and `AdminChangePasswordPage` guard.
+- **`POST /api/auth/logout`** — clears httpOnly cookie server-side.
+- **Rate limiting:** `express-rate-limit` on `POST /api/auth/login` — 10 attempts per IP per 15 min. `trust proxy: 1` set for Vercel.
+- **Helmet:** HTTP security headers on all responses.
+- **Body size limit:** `express.json({ limit: '10kb' })`.
+- **Order total server-side:** `POST /api/orders` fetches prices from DB, verifies products exist + are published + have stock, computes total — client-provided total ignored.
+- **First-run setup:** `GET /api/auth/setup/status` + `POST /api/auth/setup` — locks after first admin created. `/setup` page live at client, renders outside shop shell. UAT confirmed.
 - **Admin credentials:** Del's in 1Password. Janetta's TBD (when she's told about the project).
 - `server/db/create-admin.js` exists but is superseded by `/setup` page — can be deleted later.
-- **Admin login:** `/admin/login` page live. Email + password form, calls `POST /api/auth/login`, stores JWT in `localStorage` as `adminToken`, redirects to `/admin/dashboard`. Wrong creds → inline error. Empty fields → inline validation. UAT confirmed.
-- **Admin dashboard stub:** `/admin/dashboard` — reads JWT from localStorage, decodes email from payload, shows signed-in state + sign out button. No token → redirects to `/admin/login`. UAT confirmed.
-- `/setup` success screen now links to `/admin/login`.
-- Both admin routes render outside `ShopShell` (no header/cart/footer) — same pattern as `/setup`.
+- **Admin login:** `/admin/login` — email + password, sets httpOnly cookie, redirects to `/admin/products`. No localStorage token. UAT confirmed.
+- `/setup` success screen links to `/admin/login`.
+- Both admin routes render outside `ShopShell` (no header/cart/footer).
 - **Vite pinned** to port 5173 (`strictPort: true`). Shop footer has small "Admin" link.
-- **Admin rebuilt** as proper multi-section layout. `AdminShell` component (sticky header, tab nav: Products | Add Product | Users, lang toggle, sign out). Child routes: `/admin/products`, `/admin/add-product`, `/admin/users`. `/admin/dashboard` redirects to `/admin/products`. Auth check + `force_password_reset` guard in `AdminShell`.
+- **Admin rebuilt** as proper multi-section layout. `AdminShell` component (sticky header, tab nav: Products | Add Product | Users, lang toggle, sign out). Child routes: `/admin/products`, `/admin/add-product`, `/admin/users`. `/admin/dashboard` redirects to `/admin/products`. Auth check + `force_password_reset` guard in `AdminShell` via `/api/auth/me`.
 - **Add Product:** Polish-only form (name, description, price, photo, made-to-order toggle, stock qty, publish toggle). Auto-translates PL→EN via MyMemory API (free, no key needed). Image uploads directly from browser to Cloudinary (signed upload — server generates signature via `GET /api/admin/upload-signature`). `POST /api/admin/products` saves to Turso.
 - **Cloudinary wired:** `server/src/lib/cloudinary.js`. Cloud name: `dvcd99acy`. All 6 seed product images migrated to Cloudinary via `server/db/migrate-images.js`. Turso updated with Cloudinary URLs.
 - **Product data fixed:** All 6 products have correct names + descriptions matching real Janetta photos. BUG-001 resolved.
-- **Forced password reset:** `force_password_reset` column on `users` table. New users created via admin always have it set to 1. Login response includes `forcePasswordReset` flag. If true → stored in `localStorage` as `adminForceReset` → redirects to `/admin/change-password`. `AdminChangePasswordPage` is bilingual (PL/EN). `PATCH /api/auth/password` updates hash + clears flag. `AdminShell` blocks access until flag is cleared.
+- **Forced password reset:** `force_password_reset` column on `users` table. New users always get it set. Login response includes flag → redirects to `/admin/change-password`. `AdminShell` blocks via `/me` check. `PATCH /api/auth/password` updates hash + clears flag. UAT confirmed.
 - **MyMemory translation:** `server/src/lib/translate.js` — no API key, free, called server-side on every `POST /api/admin/products`.
 - **`multer` + `sharp` installed** on server (image handling). `upload.js` middleware exists but not used on the add-product route (direct-to-Cloudinary bypasses it).
-- **`server/.env`** now needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (in addition to existing vars). Add same to Vercel env vars.
+- **`server/.env`** needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `TURSO_*`, `JWT_SECRET`. All in Vercel env vars.
 
-**Next concrete action:** UAT full admin flow (Products tab → Add Product with real photo and Polish text → confirm translation + Cloudinary upload + Turso write → forced password reset on new user). Then payments (Stripe + PayPal).
+**Next concrete action:** Payments — Stripe (card) + Revolut Pay button. Stripe first.
 
 ---
 
@@ -166,6 +171,11 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-26 — Payments: Stripe + Revolut Pay (drop PayPal) — Revolut has strong Polish market fit; PayPal declining and painful to integrate
+- 2026-05-26 — Session revocation via token_version column — increment on password change invalidates all existing sessions; no blacklist needed
+- 2026-05-26 — JWT moved to httpOnly cookie (SameSite=Strict, Secure in prod) — localStorage is XSS-vulnerable; cookie approach also enables CSRF protection for free
+- 2026-05-26 — Order total computed server-side — client-provided total is a price manipulation vector
+- 2026-05-26 — GET /api/auth/me endpoint added — AdminShell needs user info but can't decode httpOnly cookie client-side
 - 2026-05-26 — MyMemory used for PL→EN auto-translation (free, no key) — DeepL killed free tier, Anthropic API requires separate billing from claude.ai subscription
 - 2026-05-26 — Cloudinary signed upload (browser→Cloudinary direct) — Vercel serverless hard limit is 4.5MB, phone photos exceed this, so image bytes never route through server
 - 2026-05-26 — Admin rebuilt as tabbed multi-section layout (Products | Add Product | Users) — single-page dump was not acceptable

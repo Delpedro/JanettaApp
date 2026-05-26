@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import db from '../../db/client.js';
-import { requireAuth } from '../middleware/auth.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { generateUploadSignature } from '../lib/cloudinary.js';
 import { translateToEnglish } from '../lib/translate.js';
 
 const router = Router();
+router.use(requireAuth, requireAdmin);
 
 function normalize(row) {
   return {
@@ -21,7 +22,7 @@ function normalize(row) {
   };
 }
 
-router.get('/products', requireAuth, async (_req, res) => {
+router.get('/products', async (_req, res) => {
   try {
     const { rows } = await db.execute('SELECT * FROM products ORDER BY id');
     res.json(rows.map(normalize));
@@ -31,7 +32,7 @@ router.get('/products', requireAuth, async (_req, res) => {
   }
 });
 
-router.get('/upload-signature', requireAuth, (_req, res) => {
+router.get('/upload-signature', (_req, res) => {
   try {
     res.json(generateUploadSignature());
   } catch (err) {
@@ -40,12 +41,15 @@ router.get('/upload-signature', requireAuth, (_req, res) => {
   }
 });
 
-router.post('/products', requireAuth, async (req, res) => {
+router.post('/products', async (req, res) => {
   const { name_pl, description_pl, price, made_to_order, stock_qty, image, published } = req.body;
 
   if (!name_pl || !description_pl || !price) {
     return res.status(400).json({ error: 'Required fields missing' });
   }
+  if (name_pl.trim().length > 200) return res.status(400).json({ error: 'Name too long' });
+  if (description_pl.trim().length > 2000) return res.status(400).json({ error: 'Description too long' });
+  if (image && image.length > 500) return res.status(400).json({ error: 'Invalid image URL' });
 
   const priceInt = Math.round(Number(price));
   if (!Number.isFinite(priceInt) || priceInt < 1) {
@@ -78,7 +82,7 @@ router.post('/products', requireAuth, async (req, res) => {
   }
 });
 
-router.patch('/products/:id', requireAuth, async (req, res) => {
+router.patch('/products/:id', async (req, res) => {
   const { published } = req.body;
   if (published === undefined) return res.status(400).json({ error: 'published required' });
   try {
@@ -93,7 +97,7 @@ router.patch('/products/:id', requireAuth, async (req, res) => {
   }
 });
 
-router.get('/users', requireAuth, async (_req, res) => {
+router.get('/users', async (_req, res) => {
   try {
     const { rows } = await db.execute('SELECT id, email, role, force_password_reset, created_at FROM users ORDER BY id');
     res.json(rows.map(r => ({
@@ -109,10 +113,12 @@ router.get('/users', requireAuth, async (_req, res) => {
   }
 });
 
-router.post('/users', requireAuth, async (req, res) => {
+router.post('/users', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+  if (email.length > 254) return res.status(400).json({ error: 'Email too long' });
   if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  if (password.length > 128) return res.status(400).json({ error: 'Password too long' });
 
   try {
     const { rows } = await db.execute({

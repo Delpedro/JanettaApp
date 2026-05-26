@@ -25,7 +25,7 @@ const t = {
 }
 
 export default function AdminProductsPage() {
-  const { getToken, lang } = useOutletContext()
+  const { lang } = useOutletContext()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -33,12 +33,7 @@ export default function AdminProductsPage() {
   const tx = t[lang]
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) return
-
-    fetch('/api/admin/products', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    fetch('/api/admin/products', { credentials: 'include' })
       .then(res => {
         if (res.status === 401) { navigate('/admin/login'); return null }
         if (!res.ok) throw new Error()
@@ -47,12 +42,9 @@ export default function AdminProductsPage() {
       .then(data => { if (data) setProducts(data) })
       .catch(() => setError(true))
       .finally(() => setLoading(false))
-  }, [getToken, navigate])
+  }, [navigate])
 
   async function togglePublished(id, currentValue) {
-    const token = getToken()
-    if (!token) return
-
     setProducts(prev =>
       prev.map(p => p.id === id ? { ...p, published: !currentValue } : p)
     )
@@ -60,10 +52,8 @@ export default function AdminProductsPage() {
     try {
       const res = await fetch(`/api/admin/products/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ published: !currentValue }),
       })
       if (res.status === 401) { navigate('/admin/login'); return }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Outlet, NavLink } from 'react-router-dom'
 import './AdminShell.css'
 
@@ -14,26 +14,22 @@ export default function AdminShell() {
   const tx = t[lang]
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken')
-    if (!token) { navigate('/admin/login'); return }
-    if (localStorage.getItem('adminForceReset') === '1') { navigate('/admin/change-password'); return }
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      setEmail(payload.email || '')
-    } catch {
-      localStorage.removeItem('adminToken')
-      navigate('/admin/login')
-    }
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => {
+        if (res.status === 401) { navigate('/admin/login'); return null }
+        if (!res.ok) throw new Error()
+        return res.json()
+      })
+      .then(data => {
+        if (!data) return
+        if (data.forcePasswordReset) { navigate('/admin/change-password'); return }
+        setEmail(data.email || '')
+      })
+      .catch(() => navigate('/admin/login'))
   }, [navigate])
 
-  const getToken = useCallback(() => {
-    const token = localStorage.getItem('adminToken')
-    if (!token) { navigate('/admin/login'); return null }
-    return token
-  }, [navigate])
-
-  function handleLogout() {
-    localStorage.removeItem('adminToken')
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
     navigate('/admin/login')
   }
 
@@ -58,7 +54,7 @@ export default function AdminShell() {
         </nav>
       </header>
       <main className="admin-main">
-        <Outlet context={{ getToken, lang }} />
+        <Outlet context={{ lang }} />
       </main>
     </div>
   )

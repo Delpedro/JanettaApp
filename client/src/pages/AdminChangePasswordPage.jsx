@@ -9,7 +9,9 @@ export default function AdminChangePasswordPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!localStorage.getItem('adminToken')) navigate('/admin/login')
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => { if (res.status === 401) navigate('/admin/login') })
+      .catch(() => navigate('/admin/login'))
   }, [navigate])
 
   async function handleSubmit(e) {
@@ -18,16 +20,16 @@ export default function AdminChangePasswordPage() {
     if (password.length < 8) { setError('Hasło musi mieć co najmniej 8 znaków. / Password must be at least 8 characters.'); return }
     if (password !== confirm) { setError('Hasła nie pasują. / Passwords do not match.'); return }
 
-    const token = localStorage.getItem('adminToken')
     setSubmitting(true)
     try {
       const res = await fetch('/api/auth/password', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ newPassword: password }),
       })
+      if (res.status === 401) { navigate('/admin/login'); return }
       if (!res.ok) throw new Error()
-      localStorage.removeItem('adminForceReset')
       navigate('/admin/products')
     } catch {
       setError('Coś poszło nie tak. Spróbuj ponownie. / Something went wrong. Try again.')

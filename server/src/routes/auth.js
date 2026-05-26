@@ -1,12 +1,27 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import db from '../../db/client.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/login', async (req, res) => {
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const COOKIE_OPTS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -27,13 +42,13 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.role, tv: user.token_version },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
+    res.cookie('adminToken', token, COOKIE_OPTS);
     res.json({
-      token,
       user: {
         id: user.id,
         email: user.email,
@@ -47,6 +62,26 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const { rows } = await db.execute({
+      sql: 'SELECT id, email, role, force_password_reset FROM users WHERE id = ?',
+      args: [req.user.id],
+    });
+    if (!rows.length) return res.status(401).json({ error: 'Unauthorized' });
+    const u = rows[0];
+    res.json({ id: u.id, email: u.email, role: u.role, forcePasswordReset: Boolean(u.force_password_reset) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+router.post('/logout', (_req, res) => {
+  res.clearCookie('adminToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+  res.json({ ok: true });
+});
+
 router.patch('/password', requireAuth, async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 8) {
@@ -56,7 +91,7 @@ router.patch('/password', requireAuth, async (req, res) => {
   try {
     const hash = await bcrypt.hash(newPassword, 12);
     await db.execute({
-      sql: 'UPDATE users SET password_hash = ?, force_password_reset = 0 WHERE id = ?',
+      sql: 'UPDATE users SET password_hash = ?, force_password_reset = 0, token_version = token_version + 1 WHERE id = ?',
       args: [hash, req.user.id],
     });
     res.json({ ok: true });

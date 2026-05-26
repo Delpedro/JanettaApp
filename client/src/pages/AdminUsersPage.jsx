@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
 const t = {
@@ -35,7 +35,7 @@ const t = {
 }
 
 export default function AdminUsersPage() {
-  const { getToken, lang } = useOutletContext()
+  const { lang } = useOutletContext()
   const [users, setUsers] = useState([])
   const [loadError, setLoadError] = useState(false)
   const [email, setEmail] = useState('')
@@ -45,11 +45,9 @@ export default function AdminUsersPage() {
   const navigate = useNavigate()
   const tx = t[lang]
 
-  const loadUsers = useCallback(() => {
-    const token = getToken()
-    if (!token) return
+  function loadUsers() {
     setLoadError(false)
-    fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } })
+    fetch('/api/admin/users', { credentials: 'include' })
       .then(res => {
         if (res.status === 401) { navigate('/admin/login'); return null }
         if (!res.ok) throw new Error()
@@ -57,21 +55,20 @@ export default function AdminUsersPage() {
       })
       .then(data => { if (data) setUsers(data) })
       .catch(() => setLoadError(true))
-  }, [getToken, navigate])
+  }
 
-  useEffect(() => { loadUsers() }, [loadUsers])
+  useEffect(() => { loadUsers() }, [navigate])
 
   async function handleSubmit(e) {
     e.preventDefault()
-    const token = getToken()
-    if (!token) return
     setMsg('')
     setSaving(true)
 
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
       const data = await res.json()
