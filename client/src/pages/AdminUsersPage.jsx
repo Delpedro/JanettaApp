@@ -16,6 +16,8 @@ const t = {
     pending: 'Must change password on first login',
     loading: 'Loading…',
     loadError: 'Could not load users.',
+    deleteConfirm: 'Delete this user?',
+    deleteError: 'Failed to delete user.',
   },
   pl: {
     title: 'Administratorzy',
@@ -31,6 +33,8 @@ const t = {
     pending: 'Musi zmienić hasło przy pierwszym logowaniu',
     loading: 'Ładowanie…',
     loadError: 'Nie udało się załadować użytkowników.',
+    deleteConfirm: 'Usunąć tego użytkownika?',
+    deleteError: 'Nie udało się usunąć użytkownika.',
   },
 }
 
@@ -42,6 +46,7 @@ export default function AdminUsersPage() {
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
   const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
   const navigate = useNavigate()
   const tx = t[lang]
 
@@ -58,6 +63,21 @@ export default function AdminUsersPage() {
   }
 
   useEffect(() => { loadUsers() }, [navigate])
+
+  async function handleDelete(id) {
+    if (!window.confirm(tx.deleteConfirm)) return
+    setDeletingId(id)
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', credentials: 'include' })
+      if (res.status === 401) { navigate('/admin/login'); return }
+      if (!res.ok) { setMsg(tx.deleteError); return }
+      loadUsers()
+    } catch {
+      setMsg(tx.deleteError)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -103,7 +123,16 @@ export default function AdminUsersPage() {
                   <span className="admin-product-meta" style={{ color: '#c0392b' }}>{tx.pending}</span>
                 )}
               </div>
-              <span className="admin-product-meta">{u.role}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span className="admin-product-meta">{u.role}</span>
+                <button
+                  onClick={() => handleDelete(u.id)}
+                  disabled={deletingId === u.id}
+                  style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: '0.85rem', padding: '0.2rem 0.4rem' }}
+                >
+                  {deletingId === u.id ? '…' : '✕'}
+                </button>
+              </div>
             </li>
           ))}
         </ul>

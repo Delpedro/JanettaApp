@@ -139,4 +139,22 @@ router.post('/users', async (req, res) => {
   }
 });
 
+router.delete('/users/:id', async (req, res) => {
+  const targetId = Number(req.params.id);
+  if (targetId === req.user.id) {
+    return res.status(400).json({ error: 'Cannot delete your own account' });
+  }
+  try {
+    const { rows } = await db.execute('SELECT COUNT(*) as count FROM users');
+    if (Number(rows[0].count) <= 1) {
+      return res.status(400).json({ error: 'Cannot delete the last admin' });
+    }
+    await db.execute({ sql: 'DELETE FROM users WHERE id = ?', args: [targetId] });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete user' });
+  }
+});
+
 export default router;
