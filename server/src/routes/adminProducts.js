@@ -32,6 +32,30 @@ router.get('/products', async (_req, res) => {
   }
 });
 
+router.get('/products/:id', async (req, res) => {
+  try {
+    const { rows } = await db.execute({ sql: 'SELECT * FROM products WHERE id = ?', args: [req.params.id] });
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    const r = rows[0];
+    res.json({
+      id: r.id,
+      name_pl: r.name_pl,
+      name_en: r.name_en,
+      description_pl: r.description_pl,
+      description_en: r.description_en,
+      price: r.price,
+      image: r.image,
+      inStock: Boolean(r.in_stock),
+      madeToOrder: Boolean(r.made_to_order),
+      stockQty: r.stock_qty,
+      published: Boolean(r.published),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch product' });
+  }
+});
+
 router.get('/upload-signature', (_req, res) => {
   try {
     res.json(generateUploadSignature());
@@ -83,17 +107,69 @@ router.post('/products', async (req, res) => {
 });
 
 router.patch('/products/:id', async (req, res) => {
-  const { published } = req.body;
-  if (published === undefined) return res.status(400).json({ error: 'published required' });
+  const { name_pl, description_pl, price, made_to_order, stock_qty, image, published } = req.body;
+
+  // Quick publish toggle (used by products list)
+  if (name_pl === undefined) {
+    if (published === undefined) return res.status(400).json({ error: 'published required' });
+    try {
+      await db.execute({
+        sql: 'UPDATE products SET published = ? WHERE id = ?',
+        args: [published ? 1 : 0, req.params.id],
+      });
+      return res.json({ ok: true });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Failed to update product' });
+    }
+  }
+
+  // Full edit
+  if (!name_pl || !description_pl || !price) {
+    return res.status(400).json({ error: 'Required fields missing' });
+  }
+  if (name_pl.trim().length > 200) return res.status(400).json({ error: 'Name too long' });
+  if (description_pl.trim().length > 2000) return res.status(400).json({ error: 'Description too long' });
+  if (image && image.length > 500) return res.status(400).json({ error: 'Invalid image URL' });
+
+  const priceInt = Math.round(Number(price));
+  if (!Number.isFinite(priceInt) || priceInt < 1) {
+    return res.status(400).json({ error: 'Invalid price' });
+  }
+
+  let name_en, description_en;
+  try {
+    ({ name_en, description_en } = await translateToEnglish(name_pl.trim(), description_pl.trim()));
+  } catch (err) {
+    console.error('Translation failed:', err);
+    return res.status(500).json({ error: 'Translation failed' });
+  }
+
+  const mto = made_to_order ? 1 : 0;
+  const inStock = mto ? 0 : 1;
+  const qty = mto ? 0 : Math.max(0, parseInt(stock_qty) || 0);
+  const pub = published ? 1 : 0;
+
   try {
     await db.execute({
-      sql: 'UPDATE products SET published = ? WHERE id = ?',
-      args: [published ? 1 : 0, req.params.id],
+      sql: `UPDATE products SET name_pl=?, name_en=?, description_pl=?, description_en=?, price=?,
+            made_to_order=?, in_stock=?, stock_qty=?, image=?, published=? WHERE id=?`,
+      args: [name_pl.trim(), name_en, description_pl.trim(), description_en, priceInt, mto, inStock, qty, image || null, pub, req.params.id],
     });
     res.json({ ok: true });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+router.delete('/products/:id', async (req, res) => {
+  try {
+    await db.execute({ sql: 'DELETE FROM products WHERE id = ?', args: [req.params.id] });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 

@@ -11,6 +11,9 @@ const t = {
     inStock: 'in stock',
     visible: 'Visible',
     hidden: 'Hidden',
+    edit: 'Edit',
+    deleteConfirm: 'Delete this product? This cannot be undone.',
+    deleteError: 'Failed to delete product.',
   },
   pl: {
     title: 'Produkty',
@@ -21,6 +24,9 @@ const t = {
     inStock: 'szt.',
     visible: 'Widoczny',
     hidden: 'Ukryty',
+    edit: 'Edytuj',
+    deleteConfirm: 'Usunąć ten produkt? Nie można cofnąć.',
+    deleteError: 'Nie udało się usunąć produktu.',
   },
 }
 
@@ -29,6 +35,8 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [deletingId, setDeletingId] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
   const navigate = useNavigate()
   const tx = t[lang]
 
@@ -43,6 +51,22 @@ export default function AdminProductsPage() {
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [navigate])
+
+  async function handleDelete(id) {
+    if (!window.confirm(tx.deleteConfirm)) return
+    setDeletingId(id)
+    setDeleteError('')
+    try {
+      const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE', credentials: 'include' })
+      if (res.status === 401) { navigate('/admin/login'); return }
+      if (!res.ok) throw new Error()
+      setProducts(prev => prev.filter(p => p.id !== id))
+    } catch {
+      setDeleteError(tx.deleteError)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   async function togglePublished(id, currentValue) {
     setProducts(prev =>
@@ -74,6 +98,7 @@ export default function AdminProductsPage() {
       {!loading && !error && products.length === 0 && (
         <p className="admin-status">{tx.empty}</p>
       )}
+      {deleteError && <p className="admin-status admin-status--error">{deleteError}</p>}
 
       <ul className="admin-product-list">
         {products.map(p => (
@@ -87,12 +112,27 @@ export default function AdminProductsPage() {
                 {p.madeToOrder ? tx.madeToOrder : `${p.stockQty ?? 0} ${tx.inStock}`}
               </span>
             </div>
-            <button
-              className={`admin-toggle${p.published ? ' admin-toggle--on' : ''}`}
-              onClick={() => togglePublished(p.id, p.published)}
-            >
-              {p.published ? tx.visible : tx.hidden}
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <button
+                className={`admin-toggle${p.published ? ' admin-toggle--on' : ''}`}
+                onClick={() => togglePublished(p.id, p.published)}
+              >
+                {p.published ? tx.visible : tx.hidden}
+              </button>
+              <button
+                className="admin-toggle"
+                onClick={() => navigate(`/admin/edit-product/${p.id}`)}
+              >
+                {tx.edit}
+              </button>
+              <button
+                onClick={() => handleDelete(p.id)}
+                disabled={deletingId === p.id}
+                style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontSize: '0.85rem', padding: '0.2rem 0.4rem' }}
+              >
+                {deletingId === p.id ? '…' : '✕'}
+              </button>
+            </div>
           </li>
         ))}
       </ul>

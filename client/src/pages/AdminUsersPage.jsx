@@ -141,7 +141,7 @@ export default function AdminUsersPage() {
       <h3 className="admin-section-title" style={{ marginTop: '1.5rem' }}>{tx.addTitle}</h3>
       <form className="admin-user-form" onSubmit={handleSubmit}>
         <input className="admin-user-input" type="email" placeholder={tx.email} value={email} onChange={e => setEmail(e.target.value)} required />
-        <input className="admin-user-input" type="password" placeholder={tx.password} value={password} onChange={e => setPassword(e.target.value)} required />
+        <input className="admin-user-input" type="password" placeholder={tx.password} value={password} onChange={e => setPassword(e.target.value)} required autoComplete="new-password" />
         <button className="admin-user-btn" type="submit" disabled={saving}>
           {saving ? tx.creating : tx.create}
         </button>

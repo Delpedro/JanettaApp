@@ -131,8 +131,18 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **MyMemory translation:** `server/src/lib/translate.js` — no API key, free, called server-side on every `POST /api/admin/products`.
 - **`multer` + `sharp` installed** on server (image handling). `upload.js` middleware exists but not used on the add-product route (direct-to-Cloudinary bypasses it).
 - **`server/.env`** needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `TURSO_*`, `JWT_SECRET`. All in Vercel env vars.
+- **Add Product:** UAT confirmed on desktop + iPhone. Navigates to products list on success.
+- **iOS cookie fix:** `sameSite: lax` + `path: '/'` — confirmed working on iPhone.
+- **Session revocation on password change:** `PATCH /api/auth/password` re-issues fresh JWT cookie after update.
+- **Delete user:** `DELETE /api/admin/users/:id` — guards: can't delete self, can't delete last admin. ✕ button in Users tab.
+- **`npm run dev`** kills ports 5173/3001 before starting.
+- **Edit product:** `GET /api/admin/products/:id` returns full product (incl. descriptions). `PATCH /api/admin/products/:id` handles both quick publish toggle (body has only `published`) and full edit (body has `name_pl` → re-translates, updates all fields). `AdminEditProductPage` at `/admin/edit-product/:id` — pre-filled form, optional image replace, navigates to products list on save. UAT confirmed.
+- **Delete product:** `DELETE /api/admin/products/:id`. ✕ button per row in products list. Confirm dialog. Orphaned `order_items.product_id` refs are safe — order_items snapshots name + price at order time. UAT confirmed.
+- **Admin login skip:** `AdminLoginPage` checks `/api/auth/me` on mount — if session is live, redirects straight to `/admin/products`. No re-login needed after navigating to shop and back. UAT confirmed.
 
-**Next concrete action:** Payments — Stripe (card) + Revolut Pay button. Stripe first.
+**Next concrete action:**
+1. Self-service reset password (admin forgets password — currently stuck)
+2. Payments — Stripe first, then Revolut Pay
 
 ---
 
@@ -171,6 +181,11 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-26 — AdminLoginPage checks /api/auth/me on mount and redirects if session live — avoid forcing re-login after navigating shop → admin footer link
+- 2026-05-26 — Delete product allowed with orphaned order_items FK — order_items snapshots name/price at order time so history is preserved without the product row
+- 2026-05-26 — PATCH /api/admin/products/:id handles both publish toggle and full edit — detected by presence of name_pl in body; keeps existing toggle call sites unchanged
+- 2026-05-26 — sameSite: lax on adminToken cookie — iOS WebKit rejects strict on fetch requests; lax still blocks cross-site POSTs so CSRF protection holds
+- 2026-05-26 — Add Product redirects to products list on success — Janetta must see the product immediately without manual navigation
 - 2026-05-26 — Payments: Stripe + Revolut Pay (drop PayPal) — Revolut has strong Polish market fit; PayPal declining and painful to integrate
 - 2026-05-26 — Session revocation via token_version column — increment on password change invalidates all existing sessions; no blacklist needed
 - 2026-05-26 — JWT moved to httpOnly cookie (SameSite=Strict, Secure in prod) — localStorage is XSS-vulnerable; cookie approach also enables CSRF protection for free

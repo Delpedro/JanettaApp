@@ -12,6 +12,7 @@ import AdminLoginPage from './pages/AdminLoginPage'
 import AdminChangePasswordPage from './pages/AdminChangePasswordPage'
 import AdminProductsPage from './pages/AdminProductsPage'
 import AdminAddProductPage from './pages/AdminAddProductPage'
+import AdminEditProductPage from './pages/AdminEditProductPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import './App.css'
 
@@ -47,6 +48,7 @@ export default function App() {
         <Route index element={<Navigate to="/admin/products" replace />} />
         <Route path="products" element={<AdminProductsPage />} />
         <Route path="add-product" element={<AdminAddProductPage />} />
+        <Route path="edit-product/:id" element={<AdminEditProductPage />} />
         <Route path="users" element={<AdminUsersPage />} />
       </Route>
       <Route path="/*" element={<ShopShell />} />

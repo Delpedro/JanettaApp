@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function AdminLoginPage() {
@@ -7,6 +7,12 @@ export default function AdminLoginPage() {
   const [serverError, setServerError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const navigate = useNavigate()
+
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then(res => { if (res.ok) navigate('/admin/products', { replace: true }) })
+      .catch(() => {})
+  }, [navigate])
 
   function validate() {
     const e = {}
