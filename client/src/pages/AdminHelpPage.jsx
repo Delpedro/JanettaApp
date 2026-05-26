@@ -52,6 +52,15 @@ const content = {
         ],
       },
       {
+        heading: 'Orders and customer emails',
+        steps: [
+          'When a customer pays, they automatically receive a confirmation email.',
+          'The email is in Polish and includes their order number, items, total, and delivery address.',
+          'You do not need to do anything — it sends automatically.',
+          'You will not see orders in the admin panel yet — this is coming soon.',
+        ],
+      },
+      {
         heading: 'Something not working?',
         steps: ['Call Joanna. She will call Del.'],
       },
@@ -105,6 +114,15 @@ const content = {
           'Fotografuj w dobrym naturalnym świetle.',
           'Trzymaj telefon nieruchomo i blisko produktu.',
           'Zdjęcie wysyła się bezpośrednio z telefonu — nie trzeba wcześniej przenosić go na komputer.',
+        ],
+      },
+      {
+        heading: 'Zamówienia i e-maile do klientów',
+        steps: [
+          'Gdy klient zapłaci, automatycznie otrzymuje e-mail z potwierdzeniem zamówienia.',
+          'E-mail jest po polsku i zawiera numer zamówienia, produkty, łączną kwotę oraz adres dostawy.',
+          'Nie musisz nic robić — wysyłka odbywa się automatycznie.',
+          'Zamówienia nie są jeszcze widoczne w panelu administracyjnym — ta funkcja pojawi się wkrótce.',
         ],
       },
       {

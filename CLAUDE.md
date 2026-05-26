@@ -142,15 +142,19 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **Stripe payments:** `POST /api/payments/create-intent` — validates stock/prices, creates Stripe PaymentIntent, inserts draft order (`status = 'payment_pending'`), returns `clientSecret`. `POST /api/webhooks/stripe` — `payment_intent.succeeded` → update order to `'paid'`, decrement stock; `payment_intent.payment_failed` → mark `'failed'`. Webhook route mounted before `express.json()` (raw body required). `stripe_payment_intent_id` column added to `orders` table.
 - **Checkout is now two-step:** (1) fill form → `POST /api/payments/create-intent`, (2) Stripe Payment Element (BLIK + Card + Revolut Pay auto-included). On success → redirects to `/checkout/complete`.
 - **`/checkout/complete`:** `CheckoutCompletePage` — retrieves PaymentIntent status from Stripe, shows confirmed/failed, clears cart on success.
-- **`client/.env`** has `VITE_STRIPE_PUBLISHABLE_KEY`. `server/.env` has `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (webhook secret needed for prod — use `stripe listen` locally or Stripe dashboard for Vercel).
+- **`client/.env`** has `VITE_STRIPE_PUBLISHABLE_KEY`. `server/.env` has `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`.
 - **Revolut Pay:** Already included automatically by Stripe Payment Element — no separate integration needed.
-- **Emails:** NOT implemented. Confirmation screen text is aspirational only. No emails sent on order, user creation, or password reset. This is a separate task (Resend or similar).
+- **Vercel env vars:** All required vars confirmed present: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PUBLISHABLE_KEY`, `RESEND_API_KEY`.
+- **Transactional email:** `server/src/lib/email.js` — `sendOrderConfirmation()` sends branded Polish HTML email via Resend. Fired from webhook `handlePaymentSucceeded` after order marked paid. Email failure caught + logged — does not break payment flow. Test mode: only delivers to Resend account owner's email. Custom domain needed for production.
+- **Stripe webhook registered:** Sandbox destination → `https://janetta-app.vercel.app/api/webhooks/stripe`. Listening to `payment_intent.succeeded` + `payment_intent.payment_failed`.
+- **UAT confirmed end-to-end:** Payment → webhook → order paid → email in inbox. Live on `janetta-app.vercel.app`.
+- **Stripe account owner:** Janetta. Del's sandbox is dev only. Real account set up by Janetta when she says yes to the project.
 
 **Next concrete action:**
-1. Transactional email — order confirmation to customer (Resend)
-2. UI/layout overhaul — Del is not happy with how the storefront looks
-3. Deploy to Vercel + wire Stripe webhook in dashboard
-4. Self-service reset password (lower urgency)
+1. UI/layout overhaul — Del not happy with storefront look
+2. Remove `POST /api/orders` — old route, bypasses Stripe, fraud vector
+3. Self-service password reset (lower urgency)
+4. Domain + Resend domain verification (when Janetta says yes)
 
 ---
 
@@ -193,6 +197,10 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 - 2026-05-26 — Stripe webhook mounted before express.json() in app.js — Stripe signature verification requires raw body; express.json() would parse and break it
 - 2026-05-26 — Stock decremented in webhook (payment_intent.succeeded) not in create-intent — prevents stock going negative if payment never completes
 - 2026-05-26 — Draft order inserted at create-intent with status=payment_pending — order exists before payment so we have orderId for reference; flipped to paid in webhook
+- 2026-05-26 — Stripe account owned by Janetta — it's her business, her money; Del's sandbox is dev only; real account set up when Janetta says yes
+- 2026-05-26 — Resend used for transactional email — free tier, no credit card, onboarding@resend.dev sender for test; custom domain required for production sends to any address
+- 2026-05-26 — Email failure does not break payment flow — sendOrderConfirmation wrapped in try/catch in webhook; order still marked paid if email throws
+- 2026-05-26 — Stripe sandbox webhook registered as dynamic-wonder — points to janetta-app.vercel.app/api/webhooks/stripe; whsec in Vercel env vars
 - 2026-05-26 — No transactional emails yet — confirmation screen text is aspirational; Resend integration is next separate task
 - 2026-05-26 — AdminLoginPage checks /api/auth/me on mount and redirects if session live — avoid forcing re-login after navigating shop → admin footer link
 - 2026-05-26 — Delete product allowed with orphaned order_items FK — order_items snapshots name/price at order time so history is preserved without the product row
