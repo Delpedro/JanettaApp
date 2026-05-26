@@ -7,6 +7,7 @@ import AdminShell from './components/AdminShell'
 import HomePage from './pages/HomePage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CheckoutPage from './pages/CheckoutPage'
+import CheckoutCompletePage from './pages/CheckoutCompletePage'
 import SetupPage from './pages/SetupPage'
 import AdminLoginPage from './pages/AdminLoginPage'
 import AdminChangePasswordPage from './pages/AdminChangePasswordPage'
@@ -29,6 +30,7 @@ function ShopShell() {
         <Route path="/" element={<HomePage lang={lang} />} />
         <Route path="/product/:id" element={<ProductDetailPage lang={lang} />} />
         <Route path="/checkout" element={<CheckoutPage lang={lang} />} />
+        <Route path="/checkout/complete" element={<CheckoutCompletePage lang={lang} />} />
       </Routes>
       <footer className="site-footer">
         <p>© 2026 Janetta</p>

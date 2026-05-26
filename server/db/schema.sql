@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS orders (
   address_postal TEXT NOT NULL,
   total INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending',
+  stripe_payment_intent_id TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

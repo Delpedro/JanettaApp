@@ -139,11 +139,18 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **Edit product:** `GET /api/admin/products/:id` returns full product (incl. descriptions). `PATCH /api/admin/products/:id` handles both quick publish toggle (body has only `published`) and full edit (body has `name_pl` → re-translates, updates all fields). `AdminEditProductPage` at `/admin/edit-product/:id` — pre-filled form, optional image replace, navigates to products list on save. UAT confirmed.
 - **Delete product:** `DELETE /api/admin/products/:id`. ✕ button per row in products list. Confirm dialog. Orphaned `order_items.product_id` refs are safe — order_items snapshots name + price at order time. UAT confirmed.
 - **Admin login skip:** `AdminLoginPage` checks `/api/auth/me` on mount — if session is live, redirects straight to `/admin/products`. No re-login needed after navigating to shop and back. UAT confirmed.
+- **Stripe payments:** `POST /api/payments/create-intent` — validates stock/prices, creates Stripe PaymentIntent, inserts draft order (`status = 'payment_pending'`), returns `clientSecret`. `POST /api/webhooks/stripe` — `payment_intent.succeeded` → update order to `'paid'`, decrement stock; `payment_intent.payment_failed` → mark `'failed'`. Webhook route mounted before `express.json()` (raw body required). `stripe_payment_intent_id` column added to `orders` table.
+- **Checkout is now two-step:** (1) fill form → `POST /api/payments/create-intent`, (2) Stripe Payment Element (BLIK + Card + Revolut Pay auto-included). On success → redirects to `/checkout/complete`.
+- **`/checkout/complete`:** `CheckoutCompletePage` — retrieves PaymentIntent status from Stripe, shows confirmed/failed, clears cart on success.
+- **`client/.env`** has `VITE_STRIPE_PUBLISHABLE_KEY`. `server/.env` has `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` (webhook secret needed for prod — use `stripe listen` locally or Stripe dashboard for Vercel).
+- **Revolut Pay:** Already included automatically by Stripe Payment Element — no separate integration needed.
+- **Emails:** NOT implemented. Confirmation screen text is aspirational only. No emails sent on order, user creation, or password reset. This is a separate task (Resend or similar).
 
 **Next concrete action:**
-1. Payments — Stripe first, then Revolut Pay (next session — big one)
-2. UI/layout overhaul — Del is not happy with how the storefront looks (after payments)
-3. Self-service reset password (lower urgency)
+1. Transactional email — order confirmation to customer (Resend)
+2. UI/layout overhaul — Del is not happy with how the storefront looks
+3. Deploy to Vercel + wire Stripe webhook in dashboard
+4. Self-service reset password (lower urgency)
 
 ---
 
@@ -182,6 +189,11 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-26 — Revolut Pay included automatically by Stripe Payment Element (Irish account + PLN) — no separate integration needed; drops planned separate Revolut Pay session
+- 2026-05-26 — Stripe webhook mounted before express.json() in app.js — Stripe signature verification requires raw body; express.json() would parse and break it
+- 2026-05-26 — Stock decremented in webhook (payment_intent.succeeded) not in create-intent — prevents stock going negative if payment never completes
+- 2026-05-26 — Draft order inserted at create-intent with status=payment_pending — order exists before payment so we have orderId for reference; flipped to paid in webhook
+- 2026-05-26 — No transactional emails yet — confirmation screen text is aspirational; Resend integration is next separate task
 - 2026-05-26 — AdminLoginPage checks /api/auth/me on mount and redirects if session live — avoid forcing re-login after navigating shop → admin footer link
 - 2026-05-26 — Delete product allowed with orphaned order_items FK — order_items snapshots name/price at order time so history is preserved without the product row
 - 2026-05-26 — PATCH /api/admin/products/:id handles both publish toggle and full edit — detected by presence of name_pl in body; keeps existing toggle call sites unchanged
