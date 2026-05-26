@@ -1,39 +1,65 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
 const t = {
   en: {
     title: 'Admin Users',
     email: 'Email',
-    password: 'Password',
+    password: 'Temporary password',
     create: 'Create',
     creating: 'Creating…',
     created: 'User created.',
     error: 'Failed to create user.',
     exists: 'Email already in use.',
     shortPassword: 'Password must be at least 8 characters.',
+    addTitle: 'Add user',
+    pending: 'Must change password on first login',
+    loading: 'Loading…',
+    loadError: 'Could not load users.',
   },
   pl: {
     title: 'Administratorzy',
     email: 'Email',
-    password: 'Hasło',
+    password: 'Hasło tymczasowe',
     create: 'Utwórz',
     creating: 'Tworzenie…',
     created: 'Użytkownik utworzony.',
     error: 'Nie udało się utworzyć użytkownika.',
     exists: 'Email jest już zajęty.',
     shortPassword: 'Hasło musi mieć co najmniej 8 znaków.',
+    addTitle: 'Dodaj użytkownika',
+    pending: 'Musi zmienić hasło przy pierwszym logowaniu',
+    loading: 'Ładowanie…',
+    loadError: 'Nie udało się załadować użytkowników.',
   },
 }
 
 export default function AdminUsersPage() {
   const { getToken, lang } = useOutletContext()
+  const [users, setUsers] = useState([])
+  const [loadError, setLoadError] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [msg, setMsg] = useState('')
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
   const tx = t[lang]
+
+  const loadUsers = useCallback(() => {
+    const token = getToken()
+    if (!token) return
+    setLoadError(false)
+    fetch('/api/admin/users', { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => {
+        if (res.status === 401) { navigate('/admin/login'); return null }
+        if (!res.ok) throw new Error()
+        return res.json()
+      })
+      .then(data => { if (data) setUsers(data) })
+      .catch(() => setLoadError(true))
+  }, [getToken, navigate])
+
+  useEffect(() => { loadUsers() }, [loadUsers])
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -45,10 +71,7 @@ export default function AdminUsersPage() {
     try {
       const res = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ email, password }),
       })
       const data = await res.json()
@@ -59,6 +82,7 @@ export default function AdminUsersPage() {
       setMsg(tx.created)
       setEmail('')
       setPassword('')
+      loadUsers()
     } catch {
       setMsg(tx.error)
     } finally {
@@ -69,30 +93,34 @@ export default function AdminUsersPage() {
   return (
     <>
       <h2 className="admin-section-title">{tx.title}</h2>
+
+      {loadError && <p className="admin-status admin-status--error">{tx.loadError}</p>}
+
+      {users.length > 0 && (
+        <ul className="admin-product-list" style={{ marginBottom: '2rem' }}>
+          {users.map(u => (
+            <li key={u.id} className="admin-product-row">
+              <div className="admin-product-info">
+                <span className="admin-product-name">{u.email}</span>
+                {u.forcePasswordReset && (
+                  <span className="admin-product-meta" style={{ color: '#c0392b' }}>{tx.pending}</span>
+                )}
+              </div>
+              <span className="admin-product-meta">{u.role}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <h3 className="admin-section-title" style={{ marginTop: '1.5rem' }}>{tx.addTitle}</h3>
       <form className="admin-user-form" onSubmit={handleSubmit}>
-        <input
-          className="admin-user-input"
-          type="email"
-          placeholder={tx.email}
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        <input
-          className="admin-user-input"
-          type="password"
-          placeholder={tx.password}
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-        />
+        <input className="admin-user-input" type="email" placeholder={tx.email} value={email} onChange={e => setEmail(e.target.value)} required />
+        <input className="admin-user-input" type="password" placeholder={tx.password} value={password} onChange={e => setPassword(e.target.value)} required />
         <button className="admin-user-btn" type="submit" disabled={saving}>
           {saving ? tx.creating : tx.create}
         </button>
       </form>
-      {msg && (
-        <p className={`admin-status${msg === tx.created ? '' : ' admin-status--error'}`}>{msg}</p>
-      )}
+      {msg && <p className={`admin-status${msg === tx.created ? '' : ' admin-status--error'}`}>{msg}</p>}
     </>
   )
 }

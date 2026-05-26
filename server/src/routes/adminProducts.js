@@ -93,6 +93,22 @@ router.patch('/products/:id', requireAuth, async (req, res) => {
   }
 });
 
+router.get('/users', requireAuth, async (_req, res) => {
+  try {
+    const { rows } = await db.execute('SELECT id, email, role, force_password_reset, created_at FROM users ORDER BY id');
+    res.json(rows.map(r => ({
+      id: r.id,
+      email: r.email,
+      role: r.role,
+      forcePasswordReset: Boolean(r.force_password_reset),
+      createdAt: r.created_at,
+    })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 router.post('/users', requireAuth, async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
