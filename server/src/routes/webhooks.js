@@ -1,6 +1,7 @@
 import express, { Router } from 'express';
 import Stripe from 'stripe';
 import db from '../../db/client.js';
+import { sendOrderConfirmation } from '../lib/email.js';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -29,22 +30,23 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
 
 async function handlePaymentSucceeded(paymentIntentId) {
   const { rows } = await db.execute({
-    sql: `SELECT id FROM orders WHERE stripe_payment_intent_id = ? AND status = 'payment_pending'`,
+    sql: `SELECT id, customer_name, customer_email, address_street, address_city, address_postal, total
+          FROM orders WHERE stripe_payment_intent_id = ? AND status = 'payment_pending'`,
     args: [paymentIntentId],
   });
   if (rows.length === 0) return;
 
-  const orderId = rows[0].id;
+  const order = rows[0];
 
   const { rows: orderItems } = await db.execute({
-    sql: `SELECT product_id, qty FROM order_items WHERE order_id = ?`,
-    args: [orderId],
+    sql: `SELECT product_id, qty, price_snapshot, name_pl FROM order_items WHERE order_id = ?`,
+    args: [order.id],
   });
 
   const statements = [
     {
       sql: `UPDATE orders SET status = 'paid' WHERE id = ?`,
-      args: [orderId],
+      args: [order.id],
     },
     ...orderItems.map(item => ({
       sql: `UPDATE products SET stock_qty = stock_qty - ? WHERE id = ? AND made_to_order = 0 AND in_stock = 1`,
@@ -53,6 +55,23 @@ async function handlePaymentSucceeded(paymentIntentId) {
   ];
 
   await db.batch(statements, 'write');
+
+  try {
+    await sendOrderConfirmation({
+      to: order.customer_email,
+      customerName: order.customer_name,
+      orderId: order.id,
+      items: orderItems,
+      total: order.total,
+      address: {
+        street: order.address_street,
+        city: order.address_city,
+        postal: order.address_postal,
+      },
+    });
+  } catch (err) {
+    console.error('Order confirmation email failed:', err.message);
+  }
 }
 
 async function handlePaymentFailed(paymentIntentId) {
