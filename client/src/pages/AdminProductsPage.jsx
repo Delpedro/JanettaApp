@@ -33,7 +33,7 @@ export default function AdminProductsPage() {
   const tx = t[lang]
 
   useEffect(() => {
-    fetch('/api/admin/products', { credentials: 'include' })
+    fetch('/api/admin/products', { credentials: 'include', cache: 'no-store' })
       .then(res => {
         if (res.status === 401) { navigate('/admin/login'); return null }
         if (!res.ok) throw new Error()

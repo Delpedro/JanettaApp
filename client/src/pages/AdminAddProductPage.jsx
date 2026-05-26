@@ -123,12 +123,7 @@ export default function AdminAddProductPage() {
       })
       if (res.status === 401) { navigate('/admin/login'); return }
       if (!res.ok) throw new Error()
-      setMsg(tx.success)
-      setIsError(false)
-      setForm(EMPTY)
-      setImageFile(null)
-      setImagePreview(null)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      navigate('/admin/products')
     } catch {
       setMsg(tx.error)
       setIsError(true)
