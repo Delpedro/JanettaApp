@@ -141,8 +141,9 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **Admin login skip:** `AdminLoginPage` checks `/api/auth/me` on mount — if session is live, redirects straight to `/admin/products`. No re-login needed after navigating to shop and back. UAT confirmed.
 
 **Next concrete action:**
-1. Self-service reset password (admin forgets password — currently stuck)
-2. Payments — Stripe first, then Revolut Pay
+1. Payments — Stripe first, then Revolut Pay (next session — big one)
+2. UI/layout overhaul — Del is not happy with how the storefront looks (after payments)
+3. Self-service reset password (lower urgency)
 
 ---
 
