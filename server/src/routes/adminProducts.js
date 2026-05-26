@@ -8,6 +8,11 @@ import { translateToEnglish } from '../lib/translate.js';
 const router = Router();
 router.use(requireAuth, requireAdmin);
 
+function validId(id) {
+  const n = Number(id);
+  return Number.isInteger(n) && n > 0;
+}
+
 function normalize(row) {
   return {
     id: row.id,
@@ -33,6 +38,7 @@ router.get('/products', async (_req, res) => {
 });
 
 router.get('/products/:id', async (req, res) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid product ID' });
   try {
     const { rows } = await db.execute({ sql: 'SELECT * FROM products WHERE id = ?', args: [req.params.id] });
     if (!rows.length) return res.status(404).json({ error: 'Not found' });
@@ -107,6 +113,7 @@ router.post('/products', async (req, res) => {
 });
 
 router.patch('/products/:id', async (req, res) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid product ID' });
   const { name_pl, description_pl, price, made_to_order, stock_qty, image, published } = req.body;
 
   // Quick publish toggle (used by products list)
@@ -164,6 +171,7 @@ router.patch('/products/:id', async (req, res) => {
 });
 
 router.delete('/products/:id', async (req, res) => {
+  if (!validId(req.params.id)) return res.status(400).json({ error: 'Invalid product ID' });
   try {
     await db.execute({ sql: 'DELETE FROM products WHERE id = ?', args: [req.params.id] });
     res.json({ ok: true });

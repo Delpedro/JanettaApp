@@ -85,8 +85,8 @@ router.post('/logout', (_req, res) => {
 
 router.patch('/password', requireAuth, async (req, res) => {
   const { newPassword } = req.body;
-  if (!newPassword || newPassword.length < 8) {
-    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  if (!newPassword || newPassword.length < 8 || newPassword.length > 128) {
+    return res.status(400).json({ error: 'Password must be 8–128 characters' });
   }
 
   try {
@@ -125,6 +125,8 @@ router.post('/setup', async (req, res) => {
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });
   }
+  if (email.length > 254) return res.status(400).json({ error: 'Email too long' });
+  if (password.length < 8 || password.length > 128) return res.status(400).json({ error: 'Password must be 8–128 characters' });
 
   try {
     const { rows } = await db.execute('SELECT COUNT(*) as count FROM users');

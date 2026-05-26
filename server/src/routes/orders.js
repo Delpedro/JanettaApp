@@ -11,6 +11,13 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  if (customer_name.length > 200) return res.status(400).json({ error: 'Name too long' });
+  if (customer_email.length > 254) return res.status(400).json({ error: 'Email too long' });
+  if (address_street.length > 200) return res.status(400).json({ error: 'Street too long' });
+  if (address_city.length > 100) return res.status(400).json({ error: 'City too long' });
+  if (address_postal.length > 20) return res.status(400).json({ error: 'Postal code too long' });
+  if (items.length > 50) return res.status(400).json({ error: 'Too many items' });
+
   const ids = items.map(i => i.product_id);
   if (ids.some(id => !Number.isInteger(Number(id)))) {
     return res.status(400).json({ error: 'Invalid item' });
