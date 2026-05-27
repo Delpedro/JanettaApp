@@ -165,8 +165,9 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 
 **Next concrete action:**
 1. UI/layout overhaul — Del not happy with storefront look (big session, needs Del's direction)
-2. Self-service password reset / forgot password (lower urgency)
-3. Domain + Resend domain verification (when Janetta says yes)
+2. Help page screenshots — annotated screenshots for each admin section to help Janetta. Do AFTER UI overhaul so screenshots match final design.
+3. Self-service password reset / forgot password (lower urgency)
+4. Domain + Resend domain verification (when Janetta says yes)
 
 ---
 
@@ -210,6 +211,7 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 
 - 2026-05-27 — Change password link added to AdminShell header — route existed but had no UI entry point; Janetta couldn't reach it without typing the URL
 - 2026-05-27 — Cart stock warning added — + button was silently disabled at max qty with no explanation; amber text now shows remaining stock count
+- 2026-05-27 — Checkout validation errors now reactive to language toggle — errors were stored as translated strings; changed to store keys and translate at render time
 - 2026-05-27 — lang persisted in localStorage — ShopShell unmounts on admin navigation so state was resetting to PL on every return to shop
 - 2026-05-27 — POST /api/orders removed — bypassed Stripe entirely, created paid orders without payment; fraud vector; all orders now require Stripe payment intent
 - 2026-05-27 — Admin notification email added (sendOrderNotificationToAdmin) — Janetta needs to know when orders come in; ADMIN_NOTIFICATION_EMAIL env var; currently Del's email, changes to Janetta's post-reveal

@@ -55,14 +55,14 @@ const T = {
 
 const EMPTY_FORM = { name: '', email: '', street: '', city: '', postal: '' }
 
-function validate(form, t) {
+function validate(form) {
   const errors = {}
-  if (!form.name.trim())   errors.name   = t.required
-  if (!form.email.trim())  errors.email  = t.required
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = t.emailBad
-  if (!form.street.trim()) errors.street = t.required
-  if (!form.city.trim())   errors.city   = t.required
-  if (!form.postal.trim()) errors.postal = t.required
+  if (!form.name.trim())   errors.name   = 'required'
+  if (!form.email.trim())  errors.email  = 'required'
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = 'emailBad'
+  if (!form.street.trim()) errors.street = 'required'
+  if (!form.city.trim())   errors.city   = 'required'
+  if (!form.postal.trim()) errors.postal = 'required'
   return errors
 }
 
@@ -163,7 +163,7 @@ export default function CheckoutPage({ lang }) {
 
   async function handleFormSubmit(e) {
     e.preventDefault()
-    const errs = validate(form, t)
+    const errs = validate(form)
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
@@ -231,7 +231,7 @@ export default function CheckoutPage({ lang }) {
                   value={form.name} onChange={handleChange}
                   autoComplete="name"
                 />
-                {errors.name && <span className="checkout-error">{errors.name}</span>}
+                {errors.name && <span className="checkout-error">{t[errors.name]}</span>}
               </div>
 
               <div className="checkout-field">
@@ -242,7 +242,7 @@ export default function CheckoutPage({ lang }) {
                   value={form.email} onChange={handleChange}
                   autoComplete="email"
                 />
-                {errors.email && <span className="checkout-error">{errors.email}</span>}
+                {errors.email && <span className="checkout-error">{t[errors.email]}</span>}
               </div>
             </fieldset>
 
@@ -257,7 +257,7 @@ export default function CheckoutPage({ lang }) {
                   value={form.street} onChange={handleChange}
                   autoComplete="street-address"
                 />
-                {errors.street && <span className="checkout-error">{errors.street}</span>}
+                {errors.street && <span className="checkout-error">{t[errors.street]}</span>}
               </div>
 
               <div className="checkout-field-row">
@@ -269,7 +269,7 @@ export default function CheckoutPage({ lang }) {
                     value={form.city} onChange={handleChange}
                     autoComplete="address-level2"
                   />
-                  {errors.city && <span className="checkout-error">{errors.city}</span>}
+                  {errors.city && <span className="checkout-error">{t[errors.city]}</span>}
                 </div>
 
                 <div className="checkout-field checkout-field--postal">
@@ -280,7 +280,7 @@ export default function CheckoutPage({ lang }) {
                     value={form.postal} onChange={handleChange}
                     autoComplete="postal-code"
                   />
-                  {errors.postal && <span className="checkout-error">{errors.postal}</span>}
+                  {errors.postal && <span className="checkout-error">{t[errors.postal]}</span>}
                 </div>
               </div>
             </fieldset>
