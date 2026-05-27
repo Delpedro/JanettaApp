@@ -11,6 +11,7 @@ export default function CartDrawer({ lang, onClose }) {
     remove:   lang === 'pl' ? 'Usuń'                : 'Remove',
     total:    lang === 'pl' ? 'Razem'               : 'Total',
     checkout: lang === 'pl' ? 'Przejdź do kasy'     : 'Checkout',
+    maxStock: (n) => lang === 'pl' ? `Dostępne tylko ${n} szt.` : `Only ${n} in stock`,
   }
 
   return (
@@ -69,6 +70,9 @@ export default function CartDrawer({ lang, onClose }) {
                         {t.remove}
                       </button>
                     </div>
+                    {!product.madeToOrder && qty >= maxQty && (
+                      <p className="cart-item__stock-warning">{t.maxStock(maxQty)}</p>
+                    )}
                   </div>
                 </div>
               )

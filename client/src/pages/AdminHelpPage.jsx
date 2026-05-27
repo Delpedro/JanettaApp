@@ -68,17 +68,28 @@ const content = {
         heading: 'Changing your password',
         steps: [
           'Log in to the admin panel.',
-          'This option will be available in your account settings — coming soon.',
-          'For now, call Joanna if you need your password changed.',
+          'Click "Change password" at the top of the page (next to your email address).',
+          'Enter your current password, then your new password twice.',
+          'Tap Save. You will stay logged in with the new password.',
         ],
       },
       {
         heading: 'When a customer places an order',
         steps: [
-          'The customer pays online by card (or BLIK in Poland).',
+          'The customer pays online by card or BLIK.',
           'They automatically receive a confirmation email in Polish with their order details.',
-          'At the moment, you do not receive a separate notification — this is being added soon.',
-          'For now, check with Joanna if you are unsure whether an order has come in.',
+          'You will also receive a notification email when a new order comes in.',
+          'You can see all orders in the Orders tab at the top of the admin panel.',
+        ],
+      },
+      {
+        heading: 'Viewing your orders',
+        steps: [
+          'Tap Orders at the top of the page.',
+          'You will see a list of all orders, newest first.',
+          'Tap any order row to expand it and see the customer name, address, and items ordered.',
+          'Order status: Paid = payment received, Pending = awaiting payment, Failed = payment did not go through.',
+          'If a customer contacts you about an order, their email address is shown in the order details.',
         ],
       },
       {
@@ -179,17 +190,28 @@ const content = {
         heading: 'Zmiana hasła',
         steps: [
           'Zaloguj się do panelu administracyjnego.',
-          'Ta opcja będzie dostępna w ustawieniach konta — wkrótce.',
-          'Na razie zadzwoń do Joanny, jeśli potrzebujesz zmiany hasła.',
+          'Kliknij „Zmień hasło" na górze strony (obok swojego adresu e-mail).',
+          'Wpisz obecne hasło, a następnie nowe hasło dwa razy.',
+          'Naciśnij Zapisz. Pozostaniesz zalogowana z nowym hasłem.',
         ],
       },
       {
         heading: 'Gdy klient składa zamówienie',
         steps: [
-          'Klient płaci online kartą (lub BLIK-iem).',
+          'Klient płaci online kartą lub BLIK-iem.',
           'Automatycznie otrzymuje e-mail z potwierdzeniem zamówienia po polsku ze szczegółami.',
-          'Na razie Ty nie otrzymujesz osobnego powiadomienia — ta funkcja jest wkrótce dodawana.',
-          'Na razie sprawdzaj z Joanną, jeśli nie jesteś pewna czy wpłynęło zamówienie.',
+          'Ty również otrzymasz e-mail z powiadomieniem o nowym zamówieniu.',
+          'Wszystkie zamówienia możesz zobaczyć w zakładce Zamówienia na górze panelu.',
+        ],
+      },
+      {
+        heading: 'Przeglądanie zamówień',
+        steps: [
+          'Naciśnij Zamówienia na górze strony.',
+          'Zobaczysz listę wszystkich zamówień, od najnowszego.',
+          'Kliknij dowolne zamówienie, aby rozwinąć szczegóły: imię i nazwisko klienta, adres i zamówione produkty.',
+          'Status zamówienia: Opłacone = płatność otrzymana, Oczekuje = płatność w toku, Nieudane = płatność nie powiodła się.',
+          'Jeśli klient skontaktuje się w sprawie zamówienia, jego adres e-mail jest widoczny w szczegółach.',
         ],
       },
       {

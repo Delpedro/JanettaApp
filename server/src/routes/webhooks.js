@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import Stripe from 'stripe';
 import db from '../../db/client.js';
-import { sendOrderConfirmation } from '../lib/email.js';
+import { sendOrderConfirmation, sendOrderNotificationToAdmin } from '../lib/email.js';
 
 const router = Router();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -71,6 +71,23 @@ async function handlePaymentSucceeded(paymentIntentId) {
     });
   } catch (err) {
     console.error('Order confirmation email failed:', err.message);
+  }
+
+  try {
+    await sendOrderNotificationToAdmin({
+      orderId: order.id,
+      customerName: order.customer_name,
+      customerEmail: order.customer_email,
+      items: orderItems,
+      total: order.total,
+      address: {
+        street: order.address_street,
+        city: order.address_city,
+        postal: order.address_postal,
+      },
+    });
+  } catch (err) {
+    console.error('Admin notification email failed:', err.message);
   }
 }
 

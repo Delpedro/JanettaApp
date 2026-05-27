@@ -14,17 +14,23 @@ import AdminChangePasswordPage from './pages/AdminChangePasswordPage'
 import AdminProductsPage from './pages/AdminProductsPage'
 import AdminAddProductPage from './pages/AdminAddProductPage'
 import AdminEditProductPage from './pages/AdminEditProductPage'
+import AdminOrdersPage from './pages/AdminOrdersPage'
 import AdminUsersPage from './pages/AdminUsersPage'
 import AdminHelpPage from './pages/AdminHelpPage'
 import './App.css'
 
 function ShopShell() {
-  const [lang, setLang] = useState('pl')
+  const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'pl')
   const [cartOpen, setCartOpen] = useState(false)
+
+  function handleSetLang(l) {
+    localStorage.setItem('lang', l)
+    setLang(l)
+  }
 
   return (
     <CartProvider>
-      <Header lang={lang} setLang={setLang} onOpenCart={() => setCartOpen(true)} />
+      <Header lang={lang} setLang={handleSetLang} onOpenCart={() => setCartOpen(true)} />
       {cartOpen && <CartDrawer lang={lang} onClose={() => setCartOpen(false)} />}
       <Routes>
         <Route path="/" element={<HomePage lang={lang} />} />
@@ -50,6 +56,7 @@ export default function App() {
       <Route path="/admin" element={<AdminShell />}>
         <Route index element={<Navigate to="/admin/products" replace />} />
         <Route path="products" element={<AdminProductsPage />} />
+        <Route path="orders" element={<AdminOrdersPage />} />
         <Route path="add-product" element={<AdminAddProductPage />} />
         <Route path="edit-product/:id" element={<AdminEditProductPage />} />
         <Route path="users" element={<AdminUsersPage />} />

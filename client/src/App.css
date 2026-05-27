@@ -590,6 +590,12 @@
   color: var(--accent);
 }
 
+.cart-item__stock-warning {
+  font-size: 11px;
+  color: #b45309;
+  margin: 4px 0 0;
+}
+
 /* ── Cart footer ────────────────────────────────── */
 .cart-drawer__footer {
   padding: 20px 24px;

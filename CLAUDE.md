@@ -98,7 +98,7 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - Cart: `CartContext` (global state), `CartDrawer` (slides in from right), cart icon + badge in header. Add to cart wired on cards and detail page. Qty +/−, remove, running total. UAT confirmed.
 - Checkout: `CheckoutPage` at `/checkout`. Guest form (name, email, street, city, postal). Order summary sidebar. Client-side validation. Mock confirmation screen clears cart. Postal code is free-text (no format validation — supports all countries). UAT confirmed.
 - All pushed to GitHub (`main`) — 6 commits live
-- `BUGS.md` exists (local, gitignored) — BUG-001 logged: mock product images cross-assigned
+- `BUGS.md` exists (local, gitignored) — all 4 bugs resolved (BUG-001 through BUG-004)
 - **Turso DB live:** `jannettasapp` on `aws-eu-west-1`. 4 tables applied: `products`, `users`, `orders`, `order_items`
 - **DB schema:** `server/db/schema.sql` (version controlled)
 - **DB client:** `server/db/client.js` — `@libsql/client` (latest) wired, reads from `.env`, dotenv loaded here to fix ESM import-order issue
@@ -106,8 +106,8 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **`GET /api/products/:id`** — live, returns single product or 404.
 - **Seed:** `server/db/seed.js` — run once, idempotent, populated DB with 6 mock products. Real product photos now in `client/public/images/` (product1–6.JPEG). UAT confirmed — all 6 load. Cloudinary later.
 - `HomePage` and `ProductDetailPage` fetch from API — mock import removed.
-- **`POST /api/orders`** — live. Accepts guest checkout payload, writes to `orders` + `order_items`, decrements stock for stock-tracked products. UAT confirmed — order landed in Turso.
-- `CheckoutPage` now POSTs to real API. Loading state, server error handling, bilingual error strings.
+- **`POST /api/orders` REMOVED** — old unpaid route bypassed Stripe entirely (fraud vector). Deleted `server/src/routes/orders.js`, removed from `app.js`. All orders must now go through Stripe payment flow.
+- `CheckoutPage` POSTs to `POST /api/payments/create-intent`. Loading state, server error handling, bilingual error strings.
 - **Auth:** `POST /api/auth/login` — live. Sets httpOnly cookie (`adminToken`, 7d, SameSite=Strict, Secure in prod). Returns `{ user: { id, email, role, forcePasswordReset } }`. Wrong creds → 401. UAT confirmed.
 - **JWT middleware:** `server/src/middleware/auth.js` — `requireAuth` reads from cookie. `requireAdmin` checks `role === 'admin'`. Both applied router-level to all `/api/admin/*` routes.
 - **`GET /api/auth/me`** — returns current user from cookie. Used by `AdminShell` on mount and `AdminChangePasswordPage` guard.
@@ -123,14 +123,14 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - `/setup` success screen links to `/admin/login`.
 - Both admin routes render outside `ShopShell` (no header/cart/footer).
 - **Vite pinned** to port 5173 (`strictPort: true`). Shop footer has small "Admin" link.
-- **Admin rebuilt** as proper multi-section layout. `AdminShell` component (sticky header, tab nav: Products | Add Product | Users, lang toggle, sign out). Child routes: `/admin/products`, `/admin/add-product`, `/admin/users`. `/admin/dashboard` redirects to `/admin/products`. Auth check + `force_password_reset` guard in `AdminShell` via `/api/auth/me`.
+- **Admin rebuilt** as proper multi-section layout. `AdminShell` component (sticky header, tab nav: Products | Orders | Add Product | Users | Help, lang toggle, sign out). Child routes: `/admin/products`, `/admin/orders`, `/admin/add-product`, `/admin/users`, `/admin/help`. `/admin/dashboard` redirects to `/admin/products`. Auth check + `force_password_reset` guard in `AdminShell` via `/api/auth/me`.
 - **Add Product:** Polish-only form (name, description, price, photo, made-to-order toggle, stock qty, publish toggle). Auto-translates PL→EN via MyMemory API (free, no key needed). Image uploads directly from browser to Cloudinary (signed upload — server generates signature via `GET /api/admin/upload-signature`). `POST /api/admin/products` saves to Turso.
 - **Cloudinary wired:** `server/src/lib/cloudinary.js`. Cloud name: `dvcd99acy`. All 6 seed product images migrated to Cloudinary via `server/db/migrate-images.js`. Turso updated with Cloudinary URLs.
 - **Product data fixed:** All 6 products have correct names + descriptions matching real Janetta photos. BUG-001 resolved.
 - **Forced password reset:** `force_password_reset` column on `users` table. New users always get it set. Login response includes flag → redirects to `/admin/change-password`. `AdminShell` blocks via `/me` check. `PATCH /api/auth/password` updates hash + clears flag. UAT confirmed.
 - **MyMemory translation:** `server/src/lib/translate.js` — no API key, free, called server-side on every `POST /api/admin/products`.
 - **`multer` + `sharp` installed** on server (image handling). `upload.js` middleware exists but not used on the add-product route (direct-to-Cloudinary bypasses it).
-- **`server/.env`** needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `TURSO_*`, `JWT_SECRET`. All in Vercel env vars.
+- **`server/.env`** needs: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `TURSO_*`, `JWT_SECRET`, `RESEND_API_KEY`, `ADMIN_NOTIFICATION_EMAIL`. All in Vercel env vars.
 - **Add Product:** UAT confirmed on desktop + iPhone. Navigates to products list on success.
 - **iOS cookie fix:** `sameSite: lax` + `path: '/'` — confirmed working on iPhone.
 - **Session revocation on password change:** `PATCH /api/auth/password` re-issues fresh JWT cookie after update.
@@ -144,28 +144,29 @@ She handmakes upcycled goods from sticks gathered in the woods, toilet rolls, ol
 - **`/checkout/complete`:** `CheckoutCompletePage` — retrieves PaymentIntent status from Stripe, shows confirmed/failed, clears cart on success.
 - **`client/.env`** has `VITE_STRIPE_PUBLISHABLE_KEY`. `server/.env` has `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY`.
 - **Revolut Pay:** Already included automatically by Stripe Payment Element — no separate integration needed.
-- **Vercel env vars:** All required vars confirmed present: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PUBLISHABLE_KEY`, `RESEND_API_KEY`.
-- **Transactional email:** `server/src/lib/email.js` — `sendOrderConfirmation()` sends branded Polish HTML email via Resend. Fired from webhook `handlePaymentSucceeded` after order marked paid. Email failure caught + logged — does not break payment flow. Test mode: only delivers to Resend account owner's email. Custom domain needed for production.
+- **Vercel env vars:** All confirmed in Production and Preview: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `JWT_SECRET`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `VITE_STRIPE_PUBLISHABLE_KEY`, `RESEND_API_KEY`, `ADMIN_NOTIFICATION_EMAIL`.
+- **Vercel CLI installed** — `npm install -g vercel`, linked to `delpedro69/janetta-app`. Use CLI (`vercel env add`) when Vercel UI fails to save sensitive env vars.
+- **Transactional email:** `server/src/lib/email.js` — `sendOrderConfirmation()` sends branded Polish HTML to customer; `sendOrderNotificationToAdmin()` sends Polish alert email to `ADMIN_NOTIFICATION_EMAIL` (currently Del's email, will change to Janetta's post-reveal). Both fired from webhook `handlePaymentSucceeded`. Both wrapped in try/catch — email failure does not break payment flow. Test mode: Resend only delivers to account owner regardless of `to` address. Custom domain needed for production.
 - **Stripe webhook registered:** Sandbox destination → `https://janetta-app.vercel.app/api/webhooks/stripe`. Listening to `payment_intent.succeeded` + `payment_intent.payment_failed`.
 - **UAT confirmed end-to-end:** Payment → webhook → order paid → email in inbox. Live on `janetta-app.vercel.app`.
 - **Stripe account owner:** Janetta. Del's sandbox is dev only. Real account set up by Janetta when she says yes to the project.
 
-**Help page — what's covered vs what's missing:**
-- Covered: login, add product, edit product, hide product, delete product, stock vs made-to-order, change password (placeholder), orders (customer email), Stripe payments, photo tips, something not working.
+- **Admin orders list:** `GET /api/admin/orders` — returns last 100 orders with items (json_group_array), newest first. `AdminOrdersPage` at `/admin/orders` — expandable rows showing customer, address, items, total. Status badge (paid/failed/payment_pending/pending). Bilingual.
+- **Language toggle persists:** `lang` stored in `localStorage` — survives admin navigation and page refresh.
+- **Cart stock warning:** When qty hits max for a stock-tracked item, amber warning shows "Dostępne tylko X szt." / "Only X in stock". Made-to-order items unaffected.
+- **Change password link in admin header:** "Change password" / "Zmień hasło" link sits next to email + sign out in `AdminShell` header. Navigates to `/admin/change-password`.
+
+**Help page — what's covered:**
+- Login, add product, edit product, hide product, delete product, stock vs made-to-order, change password (link in header), orders notification (email to admin), viewing orders (Orders tab), Stripe payments, photo tips, something not working.
 - Missing (not built yet — build before handover):
-  - Order notifications to Janetta — she currently gets no alert when an order comes in. Needs: email to Janetta on every paid order.
-  - Order list in admin — Janetta cannot see incoming orders in the panel yet.
-  - Self-service password reset — currently "call Joanna". Needs a forgot-password flow.
+  - Self-service password reset (forgot password) — Janetta can change password when logged in, but cannot reset if locked out. Needs a forgot-password flow.
   - Discounts / promotional pricing — not built. Parked until post-reveal.
   - Marketing guidance (Facebook, Instagram, TikTok) — out of scope for the app itself. Separate conversation with Joanna post-reveal.
 
 **Next concrete action:**
-1. UI/layout overhaul — Del not happy with storefront look
-2. Order notification email to Janetta — she needs to know when an order comes in
-3. Remove `POST /api/orders` — old route, bypasses Stripe, fraud vector
-4. Order list in admin panel
-5. Self-service password reset (lower urgency)
-6. Domain + Resend domain verification (when Janetta says yes)
+1. UI/layout overhaul — Del not happy with storefront look (big session, needs Del's direction)
+2. Self-service password reset / forgot password (lower urgency)
+3. Domain + Resend domain verification (when Janetta says yes)
 
 ---
 
@@ -207,6 +208,12 @@ If any of those three fail, MVP is not done.
 
 Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision — short reason`.
 
+- 2026-05-27 — Change password link added to AdminShell header — route existed but had no UI entry point; Janetta couldn't reach it without typing the URL
+- 2026-05-27 — Cart stock warning added — + button was silently disabled at max qty with no explanation; amber text now shows remaining stock count
+- 2026-05-27 — lang persisted in localStorage — ShopShell unmounts on admin navigation so state was resetting to PL on every return to shop
+- 2026-05-27 — POST /api/orders removed — bypassed Stripe entirely, created paid orders without payment; fraud vector; all orders now require Stripe payment intent
+- 2026-05-27 — Admin notification email added (sendOrderNotificationToAdmin) — Janetta needs to know when orders come in; ADMIN_NOTIFICATION_EMAIL env var; currently Del's email, changes to Janetta's post-reveal
+- 2026-05-27 — Orders list added to admin (GET /api/admin/orders + AdminOrdersPage) — shows all statuses, expandable rows; Janetta needs order visibility in panel
 - 2026-05-26 — Revolut Pay included automatically by Stripe Payment Element (Irish account + PLN) — no separate integration needed; drops planned separate Revolut Pay session
 - 2026-05-26 — Stripe webhook mounted before express.json() in app.js — Stripe signature verification requires raw body; express.json() would parse and break it
 - 2026-05-26 — Stock decremented in webhook (payment_intent.succeeded) not in create-intent — prevents stock going negative if payment never completes
@@ -270,3 +277,30 @@ Append every decision here. Newest at the top. Format: `YYYY-MM-DD — decision 
 ## 11. BUGS
 
 See `BUGS.md` (local, gitignored). Create it when the first bug hits — not before.
+
+---
+
+## 12. POST-REVEAL CHECKLIST
+
+**Only action these when Janetta says yes. Do not open early.**
+
+Append items here as they're identified. Format: `[ ] item — why it's needed`.
+
+### Accounts & money
+- [ ] Janetta creates her own Stripe account (business, Polish bank) — money must go to her, not Del's sandbox
+- [ ] Swap Stripe test keys for live keys in Vercel: `STRIPE_SECRET_KEY` (sk_live_), `VITE_STRIPE_PUBLISHABLE_KEY` (pk_live_)
+- [ ] Register live Stripe webhook in Janetta's Stripe dashboard → `https://janetta-app.vercel.app/api/webhooks/stripe`
+- [ ] Update `STRIPE_WEBHOOK_SECRET` in Vercel with live webhook secret
+
+### Email
+- [ ] Buy/transfer domain — needed for Resend to send to any address (not just Resend account owner)
+- [ ] Verify domain in Resend dashboard
+- [ ] Update `FROM` address in `server/src/lib/email.js` from `onboarding@resend.dev` to `zamowienia@yourdomain.com` or similar
+- [ ] Update `ADMIN_NOTIFICATION_EMAIL` in Vercel from Del's email to Janetta's email
+
+### Admin
+- [ ] Create Janetta's admin account via `/setup` or admin Users tab — do just before handover
+- [ ] Send Janetta her temp password via WhatsApp (she must reset on first login)
+
+### Comms
+- [ ] Create WhatsApp Business group: Del + Joanna + Janetta — for order issues, support, coordination

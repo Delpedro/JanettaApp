@@ -63,3 +63,4 @@ local.db
 *.tmp
 *.swp
 .cache/
+.vercel

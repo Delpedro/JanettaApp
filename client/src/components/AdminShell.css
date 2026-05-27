@@ -74,6 +74,22 @@
   color: #3d2b1f;
 }
 
+/* ── Change password ── */
+.admin-changepw-btn {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  color: #6b5040;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.admin-changepw-btn:hover {
+  color: #3d2b1f;
+}
+
 /* ── Sign out ── */
 .admin-signout-btn {
   background: none;

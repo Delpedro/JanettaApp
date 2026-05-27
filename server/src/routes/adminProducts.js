@@ -247,4 +247,39 @@ router.delete('/users/:id', async (req, res) => {
   }
 });
 
+router.get('/orders', async (_req, res) => {
+  try {
+    const { rows } = await db.execute(`
+      SELECT
+        o.id, o.customer_name, o.customer_email,
+        o.address_street, o.address_city, o.address_postal,
+        o.total, o.status, o.created_at,
+        json_group_array(json_object(
+          'name_pl', oi.name_pl,
+          'name_en', oi.name_en,
+          'qty', oi.qty,
+          'price_snapshot', oi.price_snapshot
+        )) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      GROUP BY o.id
+      ORDER BY o.created_at DESC
+      LIMIT 100
+    `);
+    res.json(rows.map(r => ({
+      id: r.id,
+      customerName: r.customer_name,
+      customerEmail: r.customer_email,
+      address: { street: r.address_street, city: r.address_city, postal: r.address_postal },
+      total: r.total,
+      status: r.status,
+      createdAt: r.created_at,
+      items: JSON.parse(r.items || '[]').filter(i => i.name_pl !== null),
+    })));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
 export default router;

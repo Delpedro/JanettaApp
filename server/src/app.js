@@ -4,7 +4,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import productsRouter from './routes/products.js';
-import ordersRouter from './routes/orders.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/adminProducts.js';
 import paymentsRouter from './routes/payments.js';
@@ -26,7 +25,6 @@ app.use(cookieParser());
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth', authRouter);
 app.use('/api/products', productsRouter);
-app.use('/api/orders', ordersRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/payments', paymentsRouter);
 
