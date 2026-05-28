@@ -4,6 +4,81 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM = 'Janetta Shop <onboarding@resend.dev>';
 
+export async function sendAdminWelcomeEmail({ to, tempPassword }) {
+  const loginUrl = `${process.env.CLIENT_URL || 'https://janetta-app.vercel.app'}/admin/login`;
+
+  const html = `
+<!DOCTYPE html>
+<html lang="pl">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#fdf8f4;font-family:Georgia,serif;color:#3d2b1f">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#fdf8f4;padding:40px 0">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%">
+
+        <tr><td style="background:#8b5e3c;padding:32px 40px;text-align:center">
+          <h1 style="margin:0;color:#fff;font-size:24px;font-weight:normal;letter-spacing:1px">Janetta</h1>
+          <p style="margin:8px 0 0;color:#f0d9c8;font-size:13px">Rękodzieło z sercem</p>
+        </td></tr>
+
+        <tr><td style="padding:40px 40px 32px">
+          <h2 style="margin:0 0 16px;font-size:20px;color:#8b5e3c">Twoje konto jest gotowe!</h2>
+          <p style="margin:0 0 24px;color:#6b4c3b;font-size:15px;line-height:1.7">
+            Poniżej znajdziesz dane do logowania do panelu administracyjnego Twojego sklepu.
+            Przy pierwszym logowaniu zostaniesz poproszona o ustawienie nowego hasła.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#fdf8f4;border-radius:8px;padding:20px;margin-bottom:28px">
+            <tr>
+              <td style="font-size:13px;color:#9e7b6b;letter-spacing:0.5px;text-transform:uppercase;padding-bottom:6px">Adres e-mail</td>
+            </tr>
+            <tr>
+              <td style="font-size:16px;color:#3d2b1f;font-weight:bold;padding-bottom:18px">${to}</td>
+            </tr>
+            <tr>
+              <td style="font-size:13px;color:#9e7b6b;letter-spacing:0.5px;text-transform:uppercase;padding-bottom:6px">Hasło tymczasowe</td>
+            </tr>
+            <tr>
+              <td style="font-size:16px;color:#3d2b1f;font-weight:bold;font-family:monospace;letter-spacing:1px">${tempPassword}</td>
+            </tr>
+          </table>
+
+          <p style="margin:0 0 8px;font-size:14px;color:#6b4c3b;font-weight:bold">Jak się zalogować:</p>
+          <ol style="margin:0 0 28px;padding-left:20px;color:#6b4c3b;font-size:14px;line-height:2">
+            <li>Otwórz link poniżej</li>
+            <li>Wpisz swój adres e-mail i hasło tymczasowe</li>
+            <li>Ustaw własne, nowe hasło — to tylko raz</li>
+          </ol>
+
+          <a href="${loginUrl}"
+             style="display:inline-block;background:#8b5e3c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;letter-spacing:0.5px">
+            Zaloguj się do panelu
+          </a>
+
+          <p style="margin:28px 0 0;font-size:13px;color:#9e7b6b">
+            Jeśli przycisk nie działa, skopiuj ten link:<br>
+            <span style="color:#8b5e3c">${loginUrl}</span>
+          </p>
+        </td></tr>
+
+        <tr><td style="background:#fdf8f4;padding:24px 40px;text-align:center;border-top:1px solid #f0e8df">
+          <p style="margin:0;font-size:12px;color:#9e7b6b">Janetta &mdash; handmade with love in Poland</p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: 'Twoje konto w sklepie Janetta — dane do logowania',
+    html,
+  });
+}
+
 export async function sendOrderConfirmation({ to, customerName, orderId, items, total, address }) {
   const itemRowsPL = items.map(i =>
     `<tr>

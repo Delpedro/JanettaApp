@@ -4,6 +4,7 @@ import db from '../../db/client.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { generateUploadSignature, deleteImage } from '../lib/cloudinary.js';
 import { translateToEnglish } from '../lib/translate.js';
+import { sendAdminWelcomeEmail } from '../lib/email.js';
 
 const router = Router();
 router.use(requireAuth, requireAdmin);
@@ -222,7 +223,16 @@ router.post('/users', async (req, res) => {
       sql: 'INSERT INTO users (email, password_hash, role, force_password_reset) VALUES (?, ?, ?, 1)',
       args: [email.trim().toLowerCase(), hash, 'admin'],
     });
-    res.status(201).json({ ok: true });
+
+    let emailSent = false;
+    try {
+      await sendAdminWelcomeEmail({ to: email.trim().toLowerCase(), tempPassword: password });
+      emailSent = true;
+    } catch (err) {
+      console.error('Welcome email failed:', err);
+    }
+
+    res.status(201).json({ ok: true, emailSent });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create user' });

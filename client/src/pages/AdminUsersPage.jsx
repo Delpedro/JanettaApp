@@ -8,7 +8,8 @@ const t = {
     password: 'Temporary password',
     create: 'Create',
     creating: 'Creating…',
-    created: 'User created.',
+    created: 'User created. Login email sent.',
+    createdNoEmail: 'User created. Email could not be sent — share credentials manually.',
     error: 'Failed to create user.',
     exists: 'Email already in use.',
     shortPassword: 'Password must be at least 8 characters.',
@@ -25,7 +26,8 @@ const t = {
     password: 'Hasło tymczasowe',
     create: 'Utwórz',
     creating: 'Tworzenie…',
-    created: 'Użytkownik utworzony.',
+    created: 'Użytkownik utworzony. Email z danymi do logowania wysłany.',
+    createdNoEmail: 'Użytkownik utworzony. Email nie mógł zostać wysłany — przekaż dane ręcznie.',
     error: 'Nie udało się utworzyć użytkownika.',
     exists: 'Email jest już zajęty.',
     shortPassword: 'Hasło musi mieć co najmniej 8 znaków.',
@@ -96,7 +98,7 @@ export default function AdminUsersPage() {
       if (res.status === 409) { setMsg(tx.exists); return }
       if (res.status === 400 && data.error?.includes('8')) { setMsg(tx.shortPassword); return }
       if (!res.ok) { setMsg(tx.error); return }
-      setMsg(tx.created)
+      setMsg(data.emailSent ? tx.created : tx.createdNoEmail)
       setEmail('')
       setPassword('')
       loadUsers()
@@ -146,7 +148,7 @@ export default function AdminUsersPage() {
           {saving ? tx.creating : tx.create}
         </button>
       </form>
-      {msg && <p className={`admin-status${msg === tx.created ? '' : ' admin-status--error'}`}>{msg}</p>}
+      {msg && <p className={`admin-status${(msg === tx.created || msg === tx.createdNoEmail) ? '' : ' admin-status--error'}`}>{msg}</p>}
     </>
   )
 }
