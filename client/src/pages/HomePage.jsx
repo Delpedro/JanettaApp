@@ -30,7 +30,7 @@ export default function HomePage({ lang }) {
 
       <section className="product-grid-section">
         <h2 className="section-title">
-          {lang === 'pl' ? 'Nasze produkty' : 'Our products'}
+          {lang === 'pl' ? 'Moje produkty' : 'My products'}
         </h2>
 
         {error ? (
